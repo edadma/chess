@@ -1,0 +1,5 @@
+#!/bin/bash
+for f in *svg
+do
+	rsvg -w 75 -h 75 "$f" "$f".png
+done
