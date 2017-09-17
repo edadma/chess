@@ -2,7 +2,7 @@ name := "chess"
 
 version := "0.1"
 
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.3"
 
 crossScalaVersions := Seq( "2.11.11" )
 
@@ -24,13 +24,12 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-	"org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
 	"org.scala-lang.modules" %% "scala-swing" % "2.0.0"
 )
 
 libraryDependencies ++= Seq(
 	"xyz.hyperreal" %% "json" % "0.7",
-	"xyz.hyperreal" %% "table" % "0.4",
+	"xyz.hyperreal" %% "table" % "0.9",
 	"xyz.hyperreal" %% "options" % "0.2"
 )
 

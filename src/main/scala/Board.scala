@@ -54,9 +54,9 @@ case class Move( src: Square, dst: Square, piece: Piece )
 object Board {
 	def color( x: Int, y: Int ): Player =
 		if (((x&1) ^ (y&1)) == 0)
-			White
-		else
 			Black
+		else
+			White
 }
 
 class Board {
@@ -77,6 +77,7 @@ class Board {
 		moves += Move( src, dst, square(dst) )
 		square( dst, square(src) )
 		square( src, null )
+		show
 	}
 
 	def canUndo = moves nonEmpty
@@ -131,11 +132,11 @@ class Board {
 			new TextTable {
 				for (y <- 7 to 0 by -1) {
 					rowSeq(
-						/*(y + 1) +:*/ (for (x <- 0 to 7) yield
+						/*(y + 1) +:*/ for (x <- 0 to 7) yield
 							pieces( x )( y ) match {
 								case null => ""
 								case p => p.sym
-							}) )
+							} )
 					line
 				}
 
