@@ -55,7 +55,7 @@ class BoardPanel( board: Board ) extends Panel {
 					if (board.valid( selection, dest ))
 						board.move( selection, dest )
 					else
-						Dialog.showMessage( this, s"a ${board.square(selection).typ.longName} can't move like that", "Error", Dialog.Message.Error )
+						Dialog.showMessage( this, s"a ${board.square(selection).typ.name} can't move like that", "Error", Dialog.Message.Error )
 				}
 
 				selection = null

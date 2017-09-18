@@ -7,11 +7,11 @@ import xyz.hyperreal.table.TextTable
 import scala.collection.mutable.ArrayBuffer
 
 
-abstract class Player( val sym: String )
+abstract class Player( val abbr: String )
 case object White extends Player( "w" )
 case object Black extends Player( "b" )
 
-abstract class Type( val shortName: String, val longName: String )
+abstract class Type( val abbr: String, val name: String )
 case object Pawn extends Type( "p", "pawn" )
 case object Knight extends Type( "n", "knight" )
 case object Bishop extends Type( "b", "bishop" )
@@ -20,7 +20,7 @@ case object Queen extends Type( "q", "queen" )
 case object King extends Type( "k", "king" )
 
 case class Piece( color: Player, typ: Type ) {
-	def sym = color.sym + typ.shortName
+	def sym = color.abbr + typ.abbr
 
 	def isPawn = typ == Pawn
 
