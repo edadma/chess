@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
 	"xyz.hyperreal" %% "json" % "0.7",
-	"xyz.hyperreal" %% "table" % "0.9",
+	"xyz.hyperreal" %% "table" % "0.10",
 	"xyz.hyperreal" %% "options" % "0.2"
 )
 

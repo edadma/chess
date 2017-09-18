@@ -51,8 +51,12 @@ class BoardPanel( board: Board ) extends Panel {
 			if (selection ne null) {
 				val dest = point2square( e.point )
 
-				if (dest.x != selection.x || dest.y != selection.y)
-					board.move( selection, dest )
+				if (dest.x != selection.x || dest.y != selection.y) {
+					if (board.valid( selection, dest ))
+						board.move( selection, dest )
+					else
+						Dialog.showMessage( this, s"a ${board.square(selection).typ.longName} can't move like that", "Error", Dialog.Message.Error )
+				}
 
 				selection = null
 				repaint
@@ -76,6 +80,12 @@ class BoardPanel( board: Board ) extends Panel {
 		repaint
 	}
 
+	def color( x: Int, y: Int ): Player =
+		if (((x&1) ^ (y&1)) == 0)
+			Black
+		else
+			White
+
 	override def paintComponent( g: Graphics2D ): Unit = {
 		super.paintComponent( g )
 
@@ -91,7 +101,7 @@ class BoardPanel( board: Board ) extends Panel {
 				else
 					7 - j
 
-			g.setColor( if (Board.color(x, y) == White) white else black )
+			g.setColor( if (color(x, y) == White) white else black )
 			g.fillRect( i*square, (7 - j)*square, square, square )
 
 			board.square( x, y ) match {
