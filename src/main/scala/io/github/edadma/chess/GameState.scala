@@ -54,7 +54,6 @@ case class Move(from: Square, to: Square) {
   def toAlgebraic: String = s"${from.toAlgebraic}${to.toAlgebraic}"
 }
 
-// Adding richer game state
 class GameState {
   private var pieces: Map[Square, Piece] = Map()
   private var currentTurn: Color         = White
