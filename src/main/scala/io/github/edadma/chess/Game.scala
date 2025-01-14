@@ -1,10 +1,16 @@
 package io.github.edadma.chess
 
-sealed trait Color
+sealed trait Color {
+  def opposite: Color
+}
 
-case object White extends Color
+case object White extends Color {
+  def opposite: Color = Black
+}
 
-case object Black extends Color
+case object Black extends Color {
+  def opposite: Color = White
+}
 
 sealed trait PieceType
 
@@ -253,5 +259,53 @@ class Game {
     } yield move
 
     moves.toList
+  }
+
+  def copyFrom(other: Game): Unit = {
+    this.pieces = other.pieces
+    this.currentTurn = other.currentTurn
+  }
+
+  def isCheck(color: Color): Boolean = {
+    // Find the king
+    val kingSquare = pieces.find { case (_, piece) =>
+      piece.pieceType == King && piece.color == color
+    }.map(_._1)
+
+    kingSquare match {
+      case None         => false
+      case Some(square) =>
+        // Check if any opponent's piece can capture the king
+        pieces.exists { case (pieceSquare, piece) =>
+          piece.color != color &&
+          getLegalMovesForPiece(pieceSquare, piece).exists(_.to == square)
+        }
+    }
+  }
+
+  def isCheckmate(color: Color): Boolean = {
+    if (!isCheck(color)) return false
+
+    // Get all possible moves for the color
+    val allMoves = for {
+      (square, piece) <- pieces if piece.color == color
+      move            <- getLegalMovesForPiece(square, piece)
+    } yield move
+
+    // Try each move to see if it gets out of check
+    !allMoves.exists { move =>
+      val tempGame = new Game
+      tempGame.copyFrom(this)
+      tempGame.makeMove(move)
+      !tempGame.isCheck(color)
+    }
+  }
+
+  def removePiece(square: Square): Unit = {
+    pieces -= square
+  }
+
+  def placePiece(square: Square, piece: Piece): Unit = {
+    pieces += (square -> piece)
   }
 }

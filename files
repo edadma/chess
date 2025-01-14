@@ -2,10 +2,12 @@
 
 # core
 ./src/main/scala/io/github/edadma/chess
+Engine.scala
 Game.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
+BasicEngineTests.scala
 GameTests.scala
 
 # build files
