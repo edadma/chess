@@ -1,0 +1,15 @@
+; Chess project sources
+
+# core
+./src/main/scala/io/github/edadma/chess
+GameState.scala
+
+# unit testing
+./src/test/scala/io/github/edadma/chess
+GameStateTests.scala
+
+# build files
+./
+build.sbt
+./project
+plugins.sbt
