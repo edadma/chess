@@ -53,7 +53,7 @@ class BasicEngine extends Engine {
 
     // Check if this move gives checkmate
     if (tempGame.isCheckmate(game.getCurrentTurn.opposite)) {
-      return 100000 // Highest priority - always choose checkmate
+      return Int.MaxValue // Highest priority - always choose checkmate
     }
 
     // Check if this move gives check

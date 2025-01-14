@@ -8,13 +8,14 @@ lazy val chess = project
   .in(file("."))
   .enablePlugins(ScalaJSPlugin)
   .settings(
-    name                                        := "chess",
-    version                                     := "0.0.1",
-    scalaVersion                                := "3.6.2",
-    organization                                := "io.github.edadma",
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
+    name         := "chess",
+    version      := "0.0.1",
+    scalaVersion := "3.6.2",
+    organization := "io.github.edadma",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % "3.2.19" % "test",
+      "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
+      "io.github.edadma"  %%% "logger"          % "0.0.6",
+      "org.scalatest"     %%% "scalatest"       % "3.2.19" % "test",
     ),
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
 //    Test / scalaJSUseMainModuleInitializer := true,
