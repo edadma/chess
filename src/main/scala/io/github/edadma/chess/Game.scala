@@ -81,6 +81,41 @@ class Game {
     }
   }
 
+  def initializeFromString(layout: String, nextTurn: Color = White): Unit = {
+    // Clear existing pieces
+    pieces = Map()
+    currentTurn = nextTurn
+
+    val rows = layout.trim.split('\n')
+    require(rows.length == 8, "Board must have 8 rows")
+
+    for {
+      (row, rankIndex) <- rows.zipWithIndex
+      rank = 8 - rankIndex // Convert from 0-based index to chess ranks (8 to 1)
+      (char, fileIndex) <- row.trim.zipWithIndex if char != ' '
+      file = ('a' + fileIndex).toChar
+    } {
+      val piece = char match {
+        case 'P' => Some(Piece(Pawn, White))
+        case 'N' => Some(Piece(Knight, White))
+        case 'B' => Some(Piece(Bishop, White))
+        case 'R' => Some(Piece(Rook, White))
+        case 'Q' => Some(Piece(Queen, White))
+        case 'K' => Some(Piece(King, White))
+        case 'p' => Some(Piece(Pawn, Black))
+        case 'n' => Some(Piece(Knight, Black))
+        case 'b' => Some(Piece(Bishop, Black))
+        case 'r' => Some(Piece(Rook, Black))
+        case 'q' => Some(Piece(Queen, Black))
+        case 'k' => Some(Piece(King, Black))
+        case '.' => None
+        case _   => throw new IllegalArgumentException(s"Invalid piece character: $char")
+      }
+
+      piece.foreach(p => pieces += (Square(file, rank) -> p))
+    }
+  }
+
   def getPiece(square: Square): Option[Piece] = pieces.get(square)
   def getCurrentTurn: Color                   = currentTurn
 

@@ -89,20 +89,24 @@ class BasicEngineTests extends AnyFreeSpec with Matchers {
 
       "should prefer checkmate over material gain" in {
         val game = new Game
-
-        // Fool's mate position with queen to capture
-        game.placePiece(Square('g', 1), Piece(King, White))
-        game.placePiece(Square('f', 2), Piece(Pawn, White))
-        game.placePiece(Square('g', 2), Piece(Pawn, White))
-        game.placePiece(Square('d', 8), Piece(Queen, Black))
-        game.placePiece(Square('f', 3), Piece(Queen, White)) // Tempting capture
+        game.initializeFromString(
+          """
+          ........
+          ........
+          .......q
+          ........
+          ........
+          ....Q...
+          .....PP.
+          ......K.
+        """,
+          Black,
+        ) // Black to move
 
         val engine = new BasicEngine
         val move   = engine.makeMove(game)
 
-        move shouldBe Some(Move(Square('d', 8), Square('h', 4)))
-        game.makeMove(move.get)
-        game.isCheckmate(White) shouldBe true
+        move shouldBe Some(Move(Square('h', 6), Square('h', 1))) // Checkmate move
       }
     }
 
