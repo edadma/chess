@@ -41,14 +41,6 @@ class BasicEngineTests extends AnyFreeSpec with Matchers {
     "when evaluating captures" - {
       "should capture undefended pieces" in {
         val game = new Game
-        game.initialize()
-
-        // Clear the board first
-        val squares = for {
-          file <- 'a' to 'h'
-          rank <- 1 to 8
-        } yield Square(file, rank)
-        squares.foreach(game.removePiece)
 
         // Set up only the pieces we want
         game.placePiece(Square('e', 4), Piece(Pawn, White))
