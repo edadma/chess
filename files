@@ -2,11 +2,11 @@
 
 # core
 ./src/main/scala/io/github/edadma/chess
-GameState.scala
+Game.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
-GameStateTests.scala
+GameTests.scala
 
 # build files
 ./
