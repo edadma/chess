@@ -3,10 +3,10 @@ package io.github.edadma.chess
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class GameStateTests extends AnyFreeSpec with Matchers {
-  "A GameState" - {
+class GameTests extends AnyFreeSpec with Matchers {
+  "A Game" - {
     "when newly initialized" - {
-      val game = new GameState
+      val game = new Game
       game.initialize()
 
       "should have white pieces in correct starting positions" in {
@@ -56,7 +56,7 @@ class GameStateTests extends AnyFreeSpec with Matchers {
     }
 
     "when making legal pawn moves" - {
-      val game = new GameState
+      val game = new Game
       game.initialize()
 
       "should allow white pawns to move one square forward" in {
@@ -67,7 +67,7 @@ class GameStateTests extends AnyFreeSpec with Matchers {
       }
 
       "should allow white pawns to move two squares forward from starting position" in {
-        val game = new GameState
+        val game = new Game
         game.initialize()
         val move = Move(Square('e', 2), Square('e', 4))
         game.makeMove(move) shouldBe true
@@ -77,7 +77,7 @@ class GameStateTests extends AnyFreeSpec with Matchers {
     }
 
     "when checking move legality" - {
-      val game = new GameState
+      val game = new Game
       game.initialize()
 
       "should not allow moving a piece to its own square" in {
@@ -103,7 +103,7 @@ class GameStateTests extends AnyFreeSpec with Matchers {
 
     "when making moves" - {
       "should alternate turns between white and black" in {
-        val game = new GameState
+        val game = new Game
         game.initialize()
 
         game.getCurrentTurn shouldBe White
