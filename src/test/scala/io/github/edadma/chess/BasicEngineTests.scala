@@ -97,8 +97,8 @@ class BasicEngineTests extends AnyFreeSpec with Matchers {
           ........
           ........
           ....Q...
-          .....PP.
-          ......K.
+          ....PP..
+          .....K..
         """,
           Black,
         ) // Black to move
