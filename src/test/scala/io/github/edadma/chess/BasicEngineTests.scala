@@ -91,14 +91,14 @@ class BasicEngineTests extends AnyFreeSpec with Matchers {
         val game = new Game
         game.initializeFromString(
           """
-          ........
-          ........
-          .......q
-          ........
-          ........
-          ....Q...
-          ....PP..
-          .....K..
+          .  .  .  .  .  .  .  .  
+          .  .  .  .  .  .  .  .  
+          .  .  .  .  .  .  .  q  
+          .  .  .  .  .  .  .  .  
+          .  .  .  .  .  .  .  .  
+          .  .  .  .  Q  .  .  .  
+          .  .  .  .  P  P  .  .  
+          .  .  .  .  .  K  .  .  
         """,
           Black,
         ) // Black to move
