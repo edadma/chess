@@ -34,6 +34,10 @@ import scala.scalajs.js
               else
                 println
                 println(g.boardToString(White))
+
+                if g.isCheckmate(g.getCurrentTurn) then println("Checkmate!")
+                else if g.isCheck(g.getCurrentTurn) then println("Check!")
+
                 println
 
                 player.makeMove(g) match
@@ -42,6 +46,10 @@ import scala.scalajs.js
                     g.makeMove(move)
                     println
                     println(g.boardToString(White))
+
+                    if g.isCheckmate(g.getCurrentTurn) then println("Checkmated!")
+                    else if g.isCheck(g.getCurrentTurn) then println("In check!")
+
                     println
                     repl.displayPrompt()
           } catch {
