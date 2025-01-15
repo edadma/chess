@@ -116,6 +116,37 @@ class Game {
     }
   }
 
+  def boardToString(perspective: Color): String = {
+    val result = new StringBuilder
+    val ranks  = if (perspective == White) 8 to 1 by -1 else 1 to 8
+    val files  = if (perspective == White) 'a' to 'h' else 'h' to 'a' by -1
+
+    for (rank <- ranks) {
+      for (file <- files) {
+        val piece = pieces.get(Square(file, rank))
+        val symbol = piece match {
+          case Some(Piece(Pawn, White))   => "P  "
+          case Some(Piece(Knight, White)) => "N  "
+          case Some(Piece(Bishop, White)) => "B  "
+          case Some(Piece(Rook, White))   => "R  "
+          case Some(Piece(Queen, White))  => "Q  "
+          case Some(Piece(King, White))   => "K  "
+          case Some(Piece(Pawn, Black))   => "p  "
+          case Some(Piece(Knight, Black)) => "n  "
+          case Some(Piece(Bishop, Black)) => "b  "
+          case Some(Piece(Rook, Black))   => "r  "
+          case Some(Piece(Queen, Black))  => "q  "
+          case Some(Piece(King, Black))   => "k  "
+          case None                       => ".  "
+        }
+        result.append(symbol)
+      }
+      if (rank != (if (whiteView) 1 else 8)) result.append('\n')
+    }
+
+    result.toString
+  }
+
   def getPiece(square: Square): Option[Piece] = pieces.get(square)
   def getCurrentTurn: Color                   = currentTurn
 
