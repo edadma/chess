@@ -12,39 +12,33 @@ import scala.scalajs.js
 
   var repl: REPLServer = null
 
-  val options: REPLOptions = new REPLOptions {
-    prompt = "> "
-    eval =
-      (cmd: String, context: js.Object, filename: String, callback: js.Function2[js.Any, js.Any, Unit]) => {
-        try {
-          val list = cmd.trim.split(" ").toList
+  val options: REPLOptions =
+    new REPLOptions {
+      prompt = "> "
+      eval =
+        (cmd: String, context: js.Object, filename: String, callback: js.Function2[js.Any, js.Any, Unit]) => {
+          try {
+            val list = cmd.trim.split(" ").toList
 
-          if list.length != 2 then callback(null, "expected '<from> <to>'")
-          else
-            val List(from, to) = list map Square.fromAlgebraic
+            if list.length != 2 then callback(null, "expected '<from> <to>'")
+            else
+              val List(from, to) = list map Square.fromAlgebraic
 
-            if from.isEmpty then callback(null, "invalid <from>")
-            else if to.isEmpty then callback(null, "invalid <to>")
-            else if !g.makeMove(Move(from.get, to.get)) then callback(null, "illegal move")
-            else {
-              println(g.boardToString(White))
-              repl.displayPrompt()
-            }
-        } catch {
-          case e: js.JavaScriptException =>
-            callback(e.asInstanceOf[js.Any], null)
+              if from.isEmpty then callback(null, "invalid <from>")
+              else if to.isEmpty then callback(null, "invalid <to>")
+              else if !g.makeMove(Move(from.get, to.get)) then
+                println(Console.RED ++ "illegal move\n" ++ Console.RESET)
+                repl.displayPrompt()
+              else
+                println
+                println(g.boardToString(White))
+                println
+                repl.displayPrompt()
+          } catch {
+            case e: js.JavaScriptException =>
+              callback(e.asInstanceOf[js.Any], null)
+          }
         }
-      }
-  }
+    }
 
   repl = REPLModule.start(options)
-
-//  val sayHelloCommand = new REPLCommand {
-//    help = "Say hello"
-//    action = (name: String) => {
-//      println(s"Hello, $name!")
-//      repl.displayPrompt()
-//    }
-//  }
-//
-//  repl.defineCommand("sayhello", sayHelloCommand)
