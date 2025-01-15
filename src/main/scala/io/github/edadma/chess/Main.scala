@@ -4,7 +4,7 @@ import scala.scalajs.js
 
 @main def run(): Unit =
   val g      = new Game
-  val player = new BasicEngine
+  val player = new NestedEngine
 
   g.initialize()
   println(g.boardToString(White))
