@@ -119,7 +119,7 @@ class Game {
   def boardToString(perspective: Color): String = {
     val result = new StringBuilder
     val ranks  = if (perspective == White) 8 to 1 by -1 else 1 to 8
-    val files  = if (perspective == White) 'a' to 'h' else 'h' to 'a' by -1
+    val files  = if (perspective == White) 'a' to 'h' else 'h' to 'a' by -1.toChar
 
     for (rank <- ranks) {
       for (file <- files) {
@@ -141,7 +141,7 @@ class Game {
         }
         result.append(symbol)
       }
-      if (rank != (if (whiteView) 1 else 8)) result.append('\n')
+      if (rank != (if (perspective == White) 1 else 8)) result.append('\n')
     }
 
     result.toString
