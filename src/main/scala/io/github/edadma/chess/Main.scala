@@ -10,6 +10,8 @@ import scala.scalajs.js
   println(g.boardToString(White))
   println
 
+  def error(msg: String): Unit = println(Console.RED ++ s"$msg\n" ++ Console.RESET)
+
   var repl: REPLServer = null
 
   val options: REPLOptions =
@@ -24,20 +26,24 @@ import scala.scalajs.js
             else
               val List(from, to) = list map Square.fromAlgebraic
 
-              if from.isEmpty then callback(null, "invalid <from>")
-              else if to.isEmpty then callback(null, "invalid <to>")
+              if from.isEmpty then error("invalid <from>")
+              else if to.isEmpty then error("invalid <to>")
               else if !g.makeMove(Move(from.get, to.get)) then
-                println(Console.RED ++ "illegal move\n" ++ Console.RESET)
+                error("illegal move")
                 repl.displayPrompt()
               else
                 println
                 println(g.boardToString(White))
                 println
-                player.makeMove(g)
-                println
-                println(g.boardToString(White))
-                println
-                repl.displayPrompt()
+
+                player.makeMove(g) match
+                  case None => error("couldn't make a move")
+                  case Some(move) =>
+                    g.makeMove(move)
+                    println
+                    println(g.boardToString(White))
+                    println
+                    repl.displayPrompt()
           } catch {
             case e: js.JavaScriptException =>
               callback(e.asInstanceOf[js.Any], null)
