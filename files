@@ -2,7 +2,9 @@
 
 # core
 ./src/main/scala/io/github/edadma/chess
+BasicEngine.scala
 Engine.scala
+NestedEngine.scala
 Game.scala
 
 # unit testing
