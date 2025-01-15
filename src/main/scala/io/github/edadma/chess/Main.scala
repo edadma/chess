@@ -3,10 +3,10 @@ package io.github.edadma.chess
 import scala.scalajs.js
 
 @main def run(): Unit =
-  val g = new Game
+  val g      = new Game
+  val player = new BasicEngine
 
   g.initialize()
-
   println(g.boardToString(White))
   println
 
@@ -30,6 +30,10 @@ import scala.scalajs.js
                 println(Console.RED ++ "illegal move\n" ++ Console.RESET)
                 repl.displayPrompt()
               else
+                println
+                println(g.boardToString(White))
+                println
+                player.makeMove(g)
                 println
                 println(g.boardToString(White))
                 println
