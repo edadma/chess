@@ -1,7 +1,6 @@
 package io.github.edadma.chess
 
-class NestedEngine extends Engine {
-  private val MaxDepth = 3
+class NestedEngine(MaxDepth: Int = 3) extends Engine {
   private val pieceValues = Map(
     Pawn   -> 100,
     Knight -> 320,
