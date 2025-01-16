@@ -5,6 +5,67 @@ import org.scalatest.matchers.should.Matchers
 
 class GameTests extends AnyFreeSpec with Matchers {
   "A Game" - {
+    "when handling check situations" - {
+      "should not allow moves that leave king in check" in {
+        val game = new Game
+
+        // Set up a position where a piece is pinned against the king
+        // White king on e1, white bishop on e2, black rook on e8
+        game.initializeFromString(
+          """
+          .  .  .  .  r  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  B  .  .  .
+          .  .  .  .  K  .  .  .
+        """,
+          White,
+        )
+
+        // Try to move the bishop (which should be pinned)
+        val illegalMove = Move(Square('e', 2), Square('d', 3))
+
+        // The move should be in getLegalMovesForPiece (basic piece movement)
+        game.getLegalMovesForPiece(
+          Square('e', 2),
+          Piece(Bishop, White),
+        ).map(_.toAlgebraic) should contain(illegalMove.toAlgebraic)
+
+        // But shouldn't be in getAllLegalMoves (considering check)
+        game.getAllLegalMoves.map(_.toAlgebraic) should not contain (illegalMove.toAlgebraic)
+
+        // And the move should not be allowed
+        game.makeMove(illegalMove) shouldBe false
+      }
+
+      "should recognize discovered check" in {
+        val game = new Game
+        game.initializeFromString(
+          """
+          .  .  .  .  k  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  B  .  .  .
+          .  .  .  .  R  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  .
+          .  .  .  .  .  .  .  K
+        """,
+          White,
+        )
+
+        // Moving the bishop reveals check from rook
+        val move = Move(Square('e', 6), Square('f', 7))
+        game.makeMove(move)
+        game.isCheck(Black) shouldBe true
+      }
+    }
+  }
+
+  "A Game" - {
     "when newly initialized" - {
       val game = new Game
       game.initialize()

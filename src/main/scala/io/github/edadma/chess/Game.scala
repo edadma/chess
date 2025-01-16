@@ -148,10 +148,12 @@ class Game {
   }
 
   def getPiece(square: Square): Option[Piece] = pieces.get(square)
-  def getCurrentTurn: Color                   = currentTurn
+
+  def getCurrentTurn: Color = currentTurn
 
   def makeMove(move: Move): Boolean = {
     if (!isLegalMove(move)) return false
+    if (wouldLeaveInCheck(move)) return false // Also check in makeMove for safety
 
     // Execute move
     getPiece(move.from).foreach { piece =>
@@ -159,7 +161,7 @@ class Game {
       pieces += (move.to -> piece)
     }
 
-    currentTurn = if (currentTurn == White) Black else White
+    currentTurn = currentTurn.opposite
     true
   }
 
@@ -317,14 +319,35 @@ class Game {
     }
   }
 
+  def isLegalMoveConsideringCheck(move: Move): Boolean = {
+    // First check basic piece movement rules
+    if (!isLegalMove(move)) return false
+
+    // Then verify it doesn't leave king in check
+    val movingPieceColor = getPiece(move.from).get.color
+    val tempGame         = new Game
+    tempGame.copyFrom(this)
+    tempGame.makeMove(move)
+    !tempGame.isCheck(movingPieceColor)
+  }
+
+  private def wouldLeaveInCheck(move: Move): Boolean = {
+    val tempGame = new Game
+    tempGame.copyFrom(this)
+    tempGame.pieces -= move.from
+    tempGame.pieces += (move.to -> getPiece(move.from).get)
+    tempGame.isCheck(currentTurn)
+  }
+
   def getAllLegalMoves: List[Move] = {
-    val moves = for {
+    val basicMoves = for {
       (square, piece) <- pieces
       if piece.color == currentTurn
       move <- getLegalMovesForPiece(square, piece)
+      if !wouldLeaveInCheck(move) // Filter out moves that would leave/put own king in check
     } yield move
 
-    moves.toList
+    basicMoves.toList
   }
 
   def copyFrom(other: Game): Unit = {
