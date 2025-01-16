@@ -319,18 +319,6 @@ class Game {
     }
   }
 
-  def isLegalMoveConsideringCheck(move: Move): Boolean = {
-    // First check basic piece movement rules
-    if (!isLegalMove(move)) return false
-
-    // Then verify it doesn't leave king in check
-    val movingPieceColor = getPiece(move.from).get.color
-    val tempGame         = new Game
-    tempGame.copyFrom(this)
-    tempGame.makeMove(move)
-    !tempGame.isCheck(movingPieceColor)
-  }
-
   private def wouldLeaveInCheck(move: Move): Boolean = {
     val tempGame = new Game
     tempGame.copyFrom(this)
