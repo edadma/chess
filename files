@@ -9,6 +9,7 @@ Game.scala
 
 # game REPL
 Main.scala
+nodejs.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
