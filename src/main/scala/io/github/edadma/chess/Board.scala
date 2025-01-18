@@ -144,6 +144,9 @@ case class Board(
   lazy val occupied: Long    = whitePieces | blackPieces
   lazy val empty: Long       = ~occupied
 
+  private lazy val whiteKingSquare: Int = 63 - java.lang.Long.numberOfLeadingZeros(whiteKing)
+  private lazy val blackKingSquare: Int = 63 - java.lang.Long.numberOfLeadingZeros(blackKing)
+
   // Helper methods for bit manipulation
   private def getBit(bitboard: Long, square: Int): Boolean = ((bitboard >>> square) & 1L) == 1L
   private def setBit(bitboard: Long, square: Int): Long    = bitboard | (1L << square)
@@ -281,15 +284,8 @@ case class Board(
   }
 
   // Check detection
-  def isInCheck(whiteKing: Boolean): Boolean = {
-    val kingSquare = if (whiteKing) {
-      63 - java.lang.Long.numberOfLeadingZeros(this.whiteKing)
-    } else {
-      63 - java.lang.Long.numberOfLeadingZeros(this.blackKing)
-    }
-
-    isSquareAttacked(kingSquare, whiteKing)
-  }
+  def isInCheck(whiteKing: Boolean): Boolean =
+    isSquareAttacked(if (whiteKing) whiteKingSquare else blackKingSquare, whiteKing)
 
   def isCheckmate: Boolean = isInCheck(whiteToMove) && !hasLegalMoves
 
@@ -330,21 +326,19 @@ case class Board(
       ((enemyPawns & NOT_A_FILE) >>> 7) | ((enemyPawns & NOT_H_FILE) >>> 9)
     }
 
-    if (getBit(pawnAttacks, square)) return true
+    if ((pawnAttacks >> square & 1L) != 0) return true
 
     // Knight attacks
-    if (getBit(KNIGHT_MOVES(square) & enemyKnights, square)) return true
+    if ((KNIGHT_MOVES(square) & enemyKnights) != 0) return true
 
     // Bishop/Queen attacks
-    val bishopAttacks = getBishopAttacks(square)
-    if (getBit(bishopAttacks & (enemyBishops | enemyQueens), square)) return true
+    if ((getBishopAttacks(square) & (enemyBishops | enemyQueens)) != 0) return true
 
     // Rook/Queen attacks
-    val rookAttacks = getRookAttacks(square)
-    if (getBit(rookAttacks & (enemyRooks | enemyQueens), square)) return true
+    if ((getRookAttacks(square) & (enemyRooks | enemyQueens)) != 0) return true
 
     // King attacks
-    getBit(KING_MOVES(square) & enemyKing, square)
+    (KING_MOVES(square) & enemyKing) != 0
   }
 
   def isStalemate(forWhite: Boolean): Boolean = {
