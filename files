@@ -2,10 +2,7 @@
 
 # core
 ./src/main/scala/io/github/edadma/chess
-BasicEngine.scala
-Engine.scala
-NestedEngine.scala
-Game.scala
+Board.scala
 
 # game REPL
 Main.scala
@@ -13,7 +10,6 @@ nodejs.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
-BasicEngineTests.scala
 GameTests.scala
 
 # build files
