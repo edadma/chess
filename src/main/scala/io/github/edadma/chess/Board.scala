@@ -273,11 +273,20 @@ case class Board(
 
     // En passant captures
     enPassantSquare.foreach { epSquare =>
-      if (
-        square % 8 > 0 && epSquare == square + leftCapture ||
-        square % 8 < 7 && epSquare == square + rightCapture
-      ) {
-        moves = setBit(moves, epSquare)
+      lastMove.foreach { move =>
+        if (
+          (move.piece == WhitePawn && !whiteToMove) ||
+          (move.piece == BlackPawn && whiteToMove)
+        ) {
+          if (math.abs(move.to - move.from) == 16) {
+            if (
+              square % 8 > 0 && epSquare == square + leftCapture ||
+              square % 8 < 7 && epSquare == square + rightCapture
+            ) {
+              moves = setBit(moves, epSquare)
+            }
+          }
+        }
       }
     }
 
