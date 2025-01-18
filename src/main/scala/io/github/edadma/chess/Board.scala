@@ -208,22 +208,29 @@ case class Board(
     val friendlyPieces = if (whiteToMove) whitePieces else blackPieces
     val enemyPieces    = if (whiteToMove) blackPieces else whitePieces
 
-    // Generate all possible moves
     (for {
       fromSquare <- 0 until 64
       if getBit(friendlyPieces, fromSquare)
       piece = getPiece(fromSquare).get
-      attacks = piece match {
-        case WhitePawn | BlackPawn     => generatePawnMoves(fromSquare)
-        case WhiteKnight | BlackKnight => KNIGHT_MOVES(fromSquare)
-        case WhiteBishop | BlackBishop => getBishopAttacks(fromSquare)
-        case WhiteRook | BlackRook     => getRookAttacks(fromSquare)
-        case WhiteQueen | BlackQueen   => getQueenAttacks(fromSquare)
-        case WhiteKing | BlackKing     => KING_MOVES(fromSquare)
+      // Get possible moves based on piece type
+      possibleMoves = piece match {
+        case WhitePawn | BlackPawn =>
+          generatePawnMoves(fromSquare)
+        case WhiteKnight | BlackKnight =>
+          // Knights can move to any square in their pattern that isn't occupied by friendly pieces
+          KNIGHT_MOVES(fromSquare) & ~friendlyPieces
+        case WhiteBishop | BlackBishop =>
+          getBishopAttacks(fromSquare) & ~friendlyPieces
+        case WhiteRook | BlackRook =>
+          getRookAttacks(fromSquare) & ~friendlyPieces
+        case WhiteQueen | BlackQueen =>
+          getQueenAttacks(fromSquare) & ~friendlyPieces
+        case WhiteKing | BlackKing =>
+          KING_MOVES(fromSquare) & ~friendlyPieces
       }
+      // Convert bitboard to list of moves
       toSquare <- 0 until 64
-      if getBit(attacks, toSquare) && !getBit(friendlyPieces, toSquare)
-      // Additional validation (check, pins, etc.) would go here
+      if getBit(possibleMoves, toSquare)
     } yield {
       Move(
         from = fromSquare,
@@ -237,16 +244,12 @@ case class Board(
   private def generatePawnMoves(square: Int): Long = {
     var moves = 0L
     val (singlePush, doublePush, leftCapture, rightCapture) =
-      if (whiteToMove) {
-        (8, 16, 7, 9)
-      } else {
-        (-8, -16, -9, -7)
-      }
+      if (whiteToMove) (8, 16, 7, 9) else (-8, -16, -9, -7)
 
-    // Single push
+    // Single push (only to empty squares)
     if (!getBit(occupied, square + singlePush)) {
       moves = setBit(moves, square + singlePush)
-      // Double push
+      // Double push from starting rank
       if ((whiteToMove && square / 8 == 1) || (!whiteToMove && square / 8 == 6)) {
         if (!getBit(occupied, square + doublePush)) {
           moves = setBit(moves, square + doublePush)
@@ -254,24 +257,21 @@ case class Board(
       }
     }
 
-    // Captures
     val enemyPieces = if (whiteToMove) blackPieces else whitePieces
-    if (square % 8 > 0) { // Not on A-file
-      if (getBit(enemyPieces, square + leftCapture)) {
-        moves = setBit(moves, square + leftCapture)
-      }
+
+    // Normal captures
+    if (square % 8 > 0 && getBit(enemyPieces, square + leftCapture)) { // Not on A-file
+      moves = setBit(moves, square + leftCapture)
     }
-    if (square % 8 < 7) { // Not on H-file
-      if (getBit(enemyPieces, square + rightCapture)) {
-        moves = setBit(moves, square + rightCapture)
-      }
+    if (square % 8 < 7 && getBit(enemyPieces, square + rightCapture)) { // Not on H-file
+      moves = setBit(moves, square + rightCapture)
     }
 
-    // En passant
+    // En passant captures
     enPassantSquare.foreach { epSquare =>
       if (
-        (square % 8 > 0 && epSquare == square + leftCapture) ||
-        (square % 8 < 7 && epSquare == square + rightCapture)
+        square % 8 > 0 && epSquare == square + leftCapture ||
+        square % 8 < 7 && epSquare == square + rightCapture
       ) {
         moves = setBit(moves, epSquare)
       }
@@ -398,5 +398,62 @@ case class Board(
     }
 
     false
+  }
+
+  def generateLegalMoves: Iterator[Move] = {
+    generateMoves.filter(move => {
+      val newBoard = makeTestMove(move)
+      !newBoard.isInCheck(whiteToMove)
+    })
+  }
+
+  def generateCastlingMoves: Iterator[Move] = {
+    if (isInCheck(whiteToMove)) return Iterator.empty
+
+    val rank  = if (whiteToMove) 0 else 7
+    val king  = if (whiteToMove) whiteKing else blackKing
+    val rooks = if (whiteToMove) whiteRooks else blackRooks
+
+    Iterator.newBuilder.addAll(
+      // Kingside castling
+      if (canCastleKingside(whiteToMove)) {
+        val from = rank * 8 + 4
+        val to   = rank * 8 + 6
+        Iterator(Move(from, to, getPiece(from).get, isCastling = true))
+      } else Iterator.empty,
+    ).addAll(
+      // Queenside castling
+      if (canCastleQueenside(whiteToMove)) {
+        val from = rank * 8 + 4
+        val to   = rank * 8 + 2
+        Iterator(Move(from, to, getPiece(from).get, isCastling = true))
+      } else Iterator.empty,
+    ).result()
+  }
+
+  private def canCastleKingside(white: Boolean): Boolean = {
+    val rank   = if (white) 0 else 7
+    val rights = if (white) castlingRights & 0x1 else castlingRights & 0x4
+    if (rights == 0) return false
+
+    // Check squares between king and rook are empty
+    val squares = Array(rank * 8 + 5, rank * 8 + 6)
+    if (squares.exists(sq => getBit(occupied, sq))) return false
+
+    // Verify squares king moves through aren't attacked
+    squares.forall(sq => !isSquareAttacked(sq, !white))
+  }
+
+  private def canCastleQueenside(white: Boolean): Boolean = {
+    val rank   = if (white) 0 else 7
+    val rights = if (white) castlingRights & 0x2 else castlingRights & 0x8
+    if (rights == 0) return false
+
+    // Check squares between king and rook are empty
+    val squares = Array(rank * 8 + 3, rank * 8 + 2, rank * 8 + 1)
+    if (squares.exists(sq => getBit(occupied, sq))) return false
+
+    // Verify squares king moves through aren't attacked
+    squares.take(2).forall(sq => !isSquareAttacked(sq, !white))
   }
 }
