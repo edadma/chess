@@ -41,6 +41,54 @@ object Board {
       }
     }
   }
+
+  def fromString(layout: String, whiteToMove: Boolean = true): Board = {
+    val rows = layout.trim.split('\n')
+    require(rows.length == 8, "Board must have 8 rows")
+
+    var whitePawns, whiteKnights, whiteBishops, whiteRooks, whiteQueens, whiteKing = 0L
+    var blackPawns, blackKnights, blackBishops, blackRooks, blackQueens, blackKing = 0L
+
+    for {
+      (row, rankIndex)       <- rows.zipWithIndex
+      (pieceChar, fileIndex) <- row.trim.grouped(3).zipWithIndex if pieceChar.trim.nonEmpty
+      square = (7 - rankIndex) * 8 + fileIndex
+    } {
+      val bit = 1L << square
+      pieceChar(0) match {
+        case 'P' => whitePawns |= bit
+        case 'N' => whiteKnights |= bit
+        case 'B' => whiteBishops |= bit
+        case 'R' => whiteRooks |= bit
+        case 'Q' => whiteQueens |= bit
+        case 'K' => whiteKing |= bit
+        case 'p' => blackPawns |= bit
+        case 'n' => blackKnights |= bit
+        case 'b' => blackBishops |= bit
+        case 'r' => blackRooks |= bit
+        case 'q' => blackQueens |= bit
+        case 'k' => blackKing |= bit
+        case '.' => // Empty square
+        case c   => throw new IllegalArgumentException(s"Invalid piece character: $c")
+      }
+    }
+
+    Board(
+      whitePawns = whitePawns,
+      whiteKnights = whiteKnights,
+      whiteBishops = whiteBishops,
+      whiteRooks = whiteRooks,
+      whiteQueens = whiteQueens,
+      whiteKing = whiteKing,
+      blackPawns = blackPawns,
+      blackKnights = blackKnights,
+      blackBishops = blackBishops,
+      blackRooks = blackRooks,
+      blackQueens = blackQueens,
+      blackKing = blackKing,
+      whiteToMove = whiteToMove,
+    )
+  }
 }
 
 // Case class for moves
@@ -242,9 +290,10 @@ case class Board(
 
     isSquareAttacked(kingSquare, whiteKing)
   }
-  def isCheckmate: Boolean = {
+
+  def isCheckmate(whiteKing: Boolean): Boolean = {
     // If not in check, it's not checkmate
-    if (!isInCheck(whiteToMove)) return false
+    if (!isInCheck(whiteKing)) return false
 
     // Generate all possible moves
     val moves = generateMoves
@@ -253,7 +302,7 @@ case class Board(
     while (moves.hasNext) {
       val move     = moves.next()
       val newBoard = makeTestMove(move)
-      if (!newBoard.isInCheck(whiteToMove)) {
+      if (!newBoard.isInCheck(whiteKing)) {
         return false // Found a legal move that escapes check
       }
     }
