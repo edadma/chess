@@ -372,17 +372,7 @@ case class Board(
     !hasLegalMoves
   }
 
-  def hasLegalMoves: Boolean = {
-    val moves = generateMoves
-    while (moves.hasNext) {
-      val move     = moves.next()
-      val newBoard = makeTestMove(move)
-      if (!newBoard.isInCheck(whiteToMove)) {
-        return true
-      }
-    }
-    false
-  }
+  def hasLegalMoves: Boolean = generateLegalMoves.nonEmpty
 
   def hasInsufficientMaterial: Boolean = {
     // King vs King
