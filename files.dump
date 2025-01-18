@@ -1,0 +1,19 @@
+; Chess project sources
+
+# core
+./src/main/scala/io/github/edadma/chess
+Board.scala
+
+# game REPL
+Main.scala
+nodejs.scala
+
+# unit testing
+./src/test/scala/io/github/edadma/chess
+GameTests.scala
+
+# build files
+./
+build.sbt
+./project
+plugins.sbt
