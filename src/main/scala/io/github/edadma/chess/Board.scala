@@ -135,6 +135,7 @@ case class Board(
     enPassantSquare: Option[Int] = None,
     halfMoveClock: Int = 0,
     moveNumber: Int = 1,
+    lastMove: Option[Move] = None,
 ) {
   import Board._
 
@@ -295,6 +296,15 @@ case class Board(
       if (getBit(bb, from)) setBit(clearBit(bb, from), to) else bb
     }
 
+    val newEnPassantSquare = {
+      if (
+        (move.piece == WhitePawn || move.piece == BlackPawn) &&
+        math.abs(move.to - move.from) == 16
+      ) {
+        Some((move.from + move.to) / 2)
+      } else None
+    }
+
     copy(
       whitePawns = updateBitboard(whitePawns, move.from, move.to),
       whiteKnights = updateBitboard(whiteKnights, move.from, move.to),
@@ -308,6 +318,8 @@ case class Board(
       blackRooks = updateBitboard(blackRooks, move.from, move.to),
       blackQueens = updateBitboard(blackQueens, move.from, move.to),
       blackKing = updateBitboard(blackKing, move.from, move.to),
+      enPassantSquare = newEnPassantSquare,
+      lastMove = Some(move),
     )
   }
 
