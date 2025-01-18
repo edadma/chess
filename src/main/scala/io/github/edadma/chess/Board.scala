@@ -363,4 +363,40 @@ case class Board(
     // King attacks
     getBit(KING_MOVES(square) & enemyKing, square)
   }
+
+  def isStalemate: Boolean = {
+    // Not stalemate if in check
+    if (isInCheck(whiteToMove)) return false
+
+    // Stalemate if no legal moves and not in check
+    !hasLegalMoves
+  }
+
+  def hasLegalMoves: Boolean = {
+    val moves = generateMoves
+    while (moves.hasNext) {
+      val move     = moves.next()
+      val newBoard = makeTestMove(move)
+      if (!newBoard.isInCheck(whiteToMove)) {
+        return true
+      }
+    }
+    false
+  }
+
+  def hasInsufficientMaterial: Boolean = {
+    // King vs King
+    if (occupied == (whiteKing | blackKing)) return true
+
+    // King and minor piece vs King
+    val whiteMaterial = whitePieces & ~whiteKing
+    val blackMaterial = blackPieces & ~blackKing
+
+    if (java.lang.Long.bitCount(whiteMaterial | blackMaterial) <= 1) {
+      val onlyMinors = (whiteKnights | whiteBishops | blackKnights | blackBishops)
+      return (whiteMaterial | blackMaterial) == onlyMinors
+    }
+
+    false
+  }
 }
