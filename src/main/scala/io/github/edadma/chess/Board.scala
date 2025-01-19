@@ -282,14 +282,25 @@ case class Board(
       move <- {
         val isPromotion = (piece == WhitePawn && toSquare / 8 == 7) ||
           (piece == BlackPawn && toSquare / 8 == 0)
+        val isEnPassant = enPassantSquare.contains(toSquare)
+        val capturedPiece =
+          if (isEnPassant) {
+            Some(if (side == White) BlackPawn else WhitePawn)
+          } else if (getBit(enemyPieces, toSquare)) {
+            getPiece(toSquare)
+          } else {
+            None
+          }
+
         if (isPromotion)
           promotionPieces.iterator.map(promotionPiece =>
             Move(
               fromSquare,
               toSquare,
               piece,
-              capture = if (getBit(enemyPieces, toSquare)) getPiece(toSquare) else None,
+              capture = capturedPiece,
               promotion = Some(promotionPiece),
+              isEnPassant = isEnPassant,
             ),
           )
         else
@@ -297,7 +308,8 @@ case class Board(
             fromSquare,
             toSquare,
             piece,
-            capture = if (getBit(enemyPieces, toSquare)) getPiece(toSquare) else None,
+            capture = capturedPiece,
+            isEnPassant = isEnPassant,
           ))
       }
     } yield move

@@ -42,29 +42,29 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
         moves should contain(Move(C5, D6, WhitePawn, Some(BlackPawn)))
       }
 
-//      "allow en passant capture" in {
-//        // Setup board with last move being black pawn double advance
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  p  P  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//       """.stripMargin.trim)
-//        val lastMove          = Move(30, 14, BlackPawn)
-//        val boardWithLastMove = board.copy(lastMove = Some(lastMove), enPassantSquare = Some(22))
-//
-//        boardWithLastMove.generateMoves(White).toList should contain(Move(
-//          23,
-//          22,
-//          WhitePawn,
-//          Some(BlackPawn),
-//          isEnPassant = true,
-//        ))
-//      }
+      "allow en passant capture" in {
+        // Setup board with last move being black pawn double advance
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  p  P  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+       """.stripMargin.trim)
+        val lastMove          = Move(C7, C5, BlackPawn)
+        val boardWithLastMove = board.copy(lastMove = Some(lastMove), enPassantSquare = Some(C6))
+
+        boardWithLastMove.generateMoves(White).toList should contain(Move(
+          D5,
+          C6,
+          WhitePawn,
+          Some(BlackPawn),
+          isEnPassant = true,
+        ))
+      }
     }
 
 //    "Knight" - {
