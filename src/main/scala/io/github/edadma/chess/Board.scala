@@ -456,26 +456,40 @@ case class Board(
     val enemyQueens  = if (byWhite) blackQueens else whiteQueens
     val enemyKing    = if (byWhite) blackKing else whiteKing
 
+    logger.debug(s"Checking if square ${Board.toAlgebraic(square)} is attacked by ${side}")
+
     // Pawn attacks
     val pawnAttacks = if (byWhite) {
       ((enemyPawns & NOT_A_FILE) << 9) | ((enemyPawns & NOT_H_FILE) << 7)
     } else {
       ((enemyPawns & NOT_A_FILE) >>> 7) | ((enemyPawns & NOT_H_FILE) >>> 9)
     }
+    val underPawnAttack = (pawnAttacks >> square & 1L) != 0
+    logger.debug(s"Under pawn attack: $underPawnAttack")
 
-    if ((pawnAttacks >> square & 1L) != 0) return true
+    if (underPawnAttack) return true
 
     // Knight attacks
-    if ((KNIGHT_MOVES(square) & enemyKnights) != 0) return true
+    val underKnightAttack = (KNIGHT_MOVES(square) & enemyKnights) != 0
+
+    logger.debug(s"Under knight attack: $underKnightAttack")
+
+    if (underKnightAttack) return true
 
     // Bishop/Queen attacks
-    if ((getBishopAttacks(square) & (enemyBishops | enemyQueens)) != 0) return true
+    val underBishopAttack = (getBishopAttacks(square) & (enemyBishops | enemyQueens)) != 0
+    logger.debug(s"Under bishop/queen diagonal attack: $underBishopAttack")
+    if (underBishopAttack) return true
 
     // Rook/Queen attacks
-    if ((getRookAttacks(square) & (enemyRooks | enemyQueens)) != 0) return true
+    val underRookAttack = (getRookAttacks(square) & (enemyRooks | enemyQueens)) != 0
+    logger.debug(s"Under rook/queen straight attack: $underRookAttack")
+    if (underRookAttack) return true
 
     // King attacks
-    (KING_MOVES(square) & enemyKing) != 0
+    val underKingAttack = (KING_MOVES(square) & enemyKing) != 0
+    logger.debug(s"Under king attack: $underKingAttack")
+    underKingAttack
   }
 
   def isStalemate(side: Side): Boolean = {
