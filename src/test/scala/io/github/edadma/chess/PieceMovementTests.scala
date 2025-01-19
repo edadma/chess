@@ -22,26 +22,26 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
         startingBoard.generateMoves(White).toList should contain(Move(C2, C3, WhitePawn))
       }
 
-//      "allow double move from starting position" in {
-//        startingBoard.generateMoves(White).toList should contain(Move(18, 34, WhitePawn))
-//      }
-//
-//      "allow diagonal capture" in {
-//        val boardWithCapture = Board.fromString("""
-//                                                  |.  .  .  .  .  .  .  .
-//                                                  |.  .  .  .  .  .  .  .
-//                                                  |.  p  .  p  .  .  .  .
-//                                                  |.  .  P  .  .  .  .  .
-//                                                  |.  .  .  .  .  .  .  .
-//                                                  |.  .  .  .  .  .  .  .
-//                                                  |.  .  .  .  .  .  .  .
-//                                                  |.  .  .  .  .  .  .  .
-//       """.stripMargin.trim)
-//        val moves = boardWithCapture.generateMoves(White).toList
-//        moves should contain(Move(18, 9, WhitePawn, Some(BlackPawn)))
-//        moves should contain(Move(18, 11, WhitePawn, Some(BlackPawn)))
-//      }
-//
+      "allow double move from starting position" in {
+        startingBoard.generateMoves(White).toList should contain(Move(C2, C4, WhitePawn))
+      }
+
+      "allow diagonal capture" in {
+        val boardWithCapture = Board.fromString("""
+                                                  |.  .  .  .  .  .  .  .
+                                                  |.  .  .  .  .  .  .  .
+                                                  |.  p  .  p  .  .  .  .
+                                                  |.  .  P  .  .  .  .  .
+                                                  |.  .  .  .  .  .  .  .
+                                                  |.  .  .  .  .  .  .  .
+                                                  |.  .  .  .  .  .  .  .
+                                                  |.  .  .  .  .  .  .  .
+       """.stripMargin.trim)
+        val moves = boardWithCapture.generateMoves(White).toList
+        moves should contain(Move(C5, B6, WhitePawn, Some(BlackPawn)))
+        moves should contain(Move(C5, D6, WhitePawn, Some(BlackPawn)))
+      }
+
 //      "allow en passant capture" in {
 //        // Setup board with last move being black pawn double advance
 //        val board = Board.fromString("""
