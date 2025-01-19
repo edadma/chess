@@ -49,31 +49,29 @@ object Board {
 
   // Initialize attack tables
   {
+    val knightDeltas = List(
+      (-2, -1),
+      (-2, 1), // 2 up, 1 left/right
+      (-1, -2),
+      (-1, 2), // 1 up, 2 left/right
+      (1, -2),
+      (1, 2), // 1 down, 2 left/right
+      (2, -1),
+      (2, 1), // 2 down, 1 left/right
+    )
+
     for (square <- 0 until 64) {
       val row = square / 8
       val col = square % 8
 
-      // Knight moves
       for {
-        dr <- Array(-2, -2, -1, -1, 1, 1, 2, 2)
-        dc <- Array(-1, 1, -2, 2, -2, 2, -1, 1)
+        (dr, dc) <- knightDeltas
         newRow = row + dr
         newCol = col + dc
         if newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8
       } {
-        KNIGHT_MOVES(square) |= 1L << (newRow * 8 + newCol)
-      }
-
-      // King moves
-      for {
-        dr <- -1 to 1
-        dc <- -1 to 1
-        if dr != 0 || dc != 0
-        newRow = row + dr
-        newCol = col + dc
-        if newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8
-      } {
-        KING_MOVES(square) |= 1L << (newRow * 8 + newCol)
+        val targetSquare = newRow * 8 + newCol
+        KNIGHT_MOVES(square) |= 1L << targetSquare
       }
     }
   }

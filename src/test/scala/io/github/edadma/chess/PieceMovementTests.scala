@@ -66,6 +66,78 @@ class PieceMovementTests extends ChessSpec {
     }
 
     "Knight" - {
+      "Knight near board edges" in withDebugLogging("Knight near board edges") {
+        // Test H8 corner knight first, with only one knight on the board
+        val cornerBoard = Board.fromString(
+          """
+            |.  .  .  .  .  .  .  N
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+          """.stripMargin.trim,
+        )
+
+        logger.debug("Testing H8 knight moves")
+        val h8Moves = cornerBoard.generateMoves(White).filter(_.from == H8).toSet
+        logger.debug(s"Generated moves from H8: ${h8Moves.map(m => s"${toAlgebraic(m.from)}->${toAlgebraic(m.to)}")}")
+        h8Moves.map(_.to) should contain only (F7, G6)
+
+//        // Test A4 edge knight separately
+//        val edgeBoard = Board.fromString(
+//          """
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |N  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//          """.stripMargin.trim,
+//        )
+//
+//        val a4Moves = edgeBoard.generateMoves(White).filter(_.from == A4).toSet
+//        a4Moves.map(_.to) should contain only (B6, C5, C3, B2)
+//
+//        // Test H1 corner knight
+//        val h1Board = Board.fromString(
+//          """
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  N
+//          """.stripMargin.trim,
+//        )
+//
+//        val h1Moves = h1Board.generateMoves(White).filter(_.from == H1).toSet
+//        h1Moves.map(_.to) should contain only (F2, G3)
+//
+//        // Test A1 corner knight
+//        val a1Board = Board.fromString(
+//          """
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |N  .  .  .  .  .  .  .
+//          """.stripMargin.trim,
+//        )
+//
+//        val a1Moves = a1Board.generateMoves(White).filter(_.from == A1).toSet
+//        a1Moves.map(_.to) should contain only (B3, C2)
+      }
+
       "generate all valid L-shaped moves" in {
         val board = Board.fromString("""
                                        |.  .  .  .  .  .  .  .
