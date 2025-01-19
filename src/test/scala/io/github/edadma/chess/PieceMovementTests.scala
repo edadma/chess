@@ -67,54 +67,55 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
       }
     }
 
-//    "Knight" - {
-//      "generate all valid L-shaped moves" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  N  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//       """.stripMargin.trim)
-//
-//        val moves = board.generateMoves(White).toSet
-//        moves should contain(Move(27, 10, WhiteKnight))
-//        moves should contain(Move(27, 12, WhiteKnight))
-//        moves should contain(Move(27, 17, WhiteKnight))
-//        moves should contain(Move(27, 21, WhiteKnight))
-//        moves should contain(Move(27, 33, WhiteKnight))
-//        moves should contain(Move(27, 37, WhiteKnight))
-//        moves should contain(Move(27, 42, WhiteKnight))
-//        moves should contain(Move(27, 44, WhiteKnight))
-//      }
-//    }
+    "Knight" - {
+      "generate all valid L-shaped moves" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  N  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+       """.stripMargin.trim)
 
-//    "Rook" - {
-//      "generate straight line moves" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  p  .  .  .  .
-//                                       |.  .  .  R  .  .  .  .
-//                                       |.  .  .  P  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//       """.stripMargin.trim)
-//
-//        val moves = board.generateMoves(White).filter(_.piece == WhiteRook).toSet
-//        moves should contain(Move(27, 19, WhiteRook, Some(BlackPawn))) // Capture up
-//        moves should contain(Move(27, 24, WhiteRook))                  // Left
-//        moves should contain(Move(27, 25, WhiteRook))                  // Left
-//        moves should contain(Move(27, 26, WhiteRook))                  // Left
-//        moves should contain(Move(27, 28, WhiteRook))                  // Right
-//        moves should contain(Move(27, 29, WhiteRook))                  // Right
-//        moves should contain(Move(27, 30, WhiteRook))                  // Right
-//      }
-//    }
+        val moves = board.generateMoves(White).toSet
+        moves should contain(Move(27, 10, WhiteKnight))
+        moves should contain(Move(27, 12, WhiteKnight))
+        moves should contain(Move(27, 17, WhiteKnight))
+        moves should contain(Move(27, 21, WhiteKnight))
+        moves should contain(Move(27, 33, WhiteKnight))
+        moves should contain(Move(27, 37, WhiteKnight))
+        moves should contain(Move(27, 42, WhiteKnight))
+        moves should contain(Move(27, 44, WhiteKnight))
+      }
+    }
+
+    "Rook" - {
+      "generate straight line moves" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  p  .  .  .  .
+                                       |.  .  .  R  .  .  .  .
+                                       |.  .  .  P  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+       """.stripMargin.trim)
+
+        val moves = board.generateMoves(White).filter(_.piece == WhiteRook).toSet
+        moves should contain(Move(D5, D6, WhiteRook, Some(BlackPawn))) // Capture up
+        moves should contain(Move(D5, C5, WhiteRook))                  // Left
+        moves should contain(Move(D5, B5, WhiteRook))                  // Left
+        moves should contain(Move(D5, A5, WhiteRook))                  // Left
+        moves should contain(Move(D5, E5, WhiteRook))                  // Right
+        moves should contain(Move(D5, F5, WhiteRook))                  // Right
+        moves should contain(Move(D5, G5, WhiteRook))                  // Right
+        moves should contain(Move(D5, H5, WhiteRook))                  // Right
+      }
+    }
 
 //    "King" - {
 //      "allow castling kingside" in {
