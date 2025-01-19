@@ -3,6 +3,7 @@
 # core
 ./src/main/scala/io/github/edadma/chess
 Board.scala
+Game.scala
 
 # game REPL
 Main.scala
