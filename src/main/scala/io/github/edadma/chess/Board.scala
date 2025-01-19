@@ -217,22 +217,56 @@ case class Board(
   }
 
   // Sliding piece attack generation
-  private def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
-    var attacks = 0L
+//  private def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
+//    var attacks = 0L
+//    for ((dx, dy) <- deltas) {
+//      var x        = square % 8
+//      var y        = square / 8
+//      var continue = true
+//      while (continue) {
+//        x += dx
+//        y += dy
+//        if (x < 0 || x > 7 || y < 0 || y > 7) {
+//          continue = false // Off board
+//        } else {
+//          val targetSquare = y * 8 + x
+//          attacks = setBit(attacks, targetSquare)
+//          if (getBit(occupied, targetSquare)) {
+//            continue = false // Blocking piece
+//          }
+//        }
+//      }
+//    }
+//    attacks
+//  }
+
+  def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
+    var attacks  = 0L
+    val fromFile = square % 8
+    val fromRank = square / 8
+    logger.debug(s"Getting ray attacks from rank $fromRank, file $fromFile")
+
     for ((dx, dy) <- deltas) {
-      var x        = square % 8
-      var y        = square / 8
+      logger.debug(s"Processing delta: ($dx, $dy)")
+      var x        = fromFile
+      var y        = fromRank
       var continue = true
       while (continue) {
         x += dx
         y += dy
-        if (x < 0 || x > 7 || y < 0 || y > 7) {
-          continue = false // Off board
+        logger.debug(s"Checking x=$x, y=$y")
+        // Check if we've moved off the board OR wrapped around a file
+        if (
+          x < 0 || x > 7 || y < 0 || y > 7 ||
+          (dx > 0 && x < fromFile) || // Wrapped right to left
+          (dx < 0 && x > fromFile)
+        ) { // Wrapped left to right
+          continue = false
         } else {
           val targetSquare = y * 8 + x
           attacks = setBit(attacks, targetSquare)
           if (getBit(occupied, targetSquare)) {
-            continue = false // Blocking piece
+            continue = false
           }
         }
       }
@@ -246,7 +280,12 @@ case class Board(
 
   def getBishopAttacks(square: Int): Long = getRayAttacks(square, occupied, BISHOP_DELTAS)
 
-  def getRookAttacks(square: Int): Long = getRayAttacks(square, occupied, ROOK_DELTAS)
+  def getRookAttacks(square: Int): Long = {
+    val attacks = getRayAttacks(square, occupied, ROOK_DELTAS)
+    logger.debug(s"Calculating rook attacks from square ${toAlgebraic(square)}")
+    logger.debug(s"Attack pattern: ${java.lang.Long.toBinaryString(attacks)}")
+    attacks
+  }
 
   def getQueenAttacks(square: Int): Long = getBishopAttacks(square) | getRookAttacks(square)
 
