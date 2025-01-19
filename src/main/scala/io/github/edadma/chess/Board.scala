@@ -212,7 +212,7 @@ case class Board(
     val friendlyPieces = if (forWhite) whitePieces else blackPieces
     val enemyPieces    = if (forWhite) blackPieces else whitePieces
 
-    (for {
+    val regularMoves = (for {
       fromSquare <- 0 until 64
       if getBit(friendlyPieces, fromSquare)
       piece = getPiece(fromSquare).get
@@ -243,6 +243,32 @@ case class Board(
         capture = if (getBit(enemyPieces, toSquare)) getPiece(toSquare) else None,
       )
     }).iterator
+
+    // Early return if in check - no castling possible
+    if (isInCheck(whiteToMove)) return regularMoves
+
+    // Add castling moves
+    regularMoves ++ {
+      val rank  = if (whiteToMove) 0 else 7
+      val king  = if (whiteToMove) whiteKing else blackKing
+      val rooks = if (whiteToMove) whiteRooks else blackRooks
+
+      Iterator.newBuilder.addAll(
+        // Kingside castling
+        if (canCastleKingside(whiteToMove)) {
+          val from = rank * 8 + 4
+          val to   = rank * 8 + 6
+          Iterator(Move(from, to, getPiece(from).get, isCastling = true))
+        } else Iterator.empty,
+      ).addAll(
+        // Queenside castling
+        if (canCastleQueenside(whiteToMove)) {
+          val from = rank * 8 + 4
+          val to   = rank * 8 + 2
+          Iterator(Move(from, to, getPiece(from).get, isCastling = true))
+        } else Iterator.empty,
+      ).result()
+    }
   }
 
   private def generatePawnMoves(square: Int): Long = {
@@ -401,30 +427,6 @@ case class Board(
       val newBoard = makeTestMove(move)
       !newBoard.isInCheck(whiteToMove)
     })
-  }
-
-  def generateCastlingMoves: Iterator[Move] = {
-    if (isInCheck(whiteToMove)) return Iterator.empty
-
-    val rank  = if (whiteToMove) 0 else 7
-    val king  = if (whiteToMove) whiteKing else blackKing
-    val rooks = if (whiteToMove) whiteRooks else blackRooks
-
-    Iterator.newBuilder.addAll(
-      // Kingside castling
-      if (canCastleKingside(whiteToMove)) {
-        val from = rank * 8 + 4
-        val to   = rank * 8 + 6
-        Iterator(Move(from, to, getPiece(from).get, isCastling = true))
-      } else Iterator.empty,
-    ).addAll(
-      // Queenside castling
-      if (canCastleQueenside(whiteToMove)) {
-        val from = rank * 8 + 4
-        val to   = rank * 8 + 2
-        Iterator(Move(from, to, getPiece(from).get, isCastling = true))
-      } else Iterator.empty,
-    ).result()
   }
 
   private def canCastleKingside(white: Boolean): Boolean = {
