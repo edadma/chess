@@ -251,6 +251,7 @@ case class Board(
   def getQueenAttacks(square: Int): Long = getBishopAttacks(square) | getRookAttacks(square)
 
   def generateMoves(side: Side): Iterator[Move] = {
+    logger.debug(s"Generating moves for ${side}")
     val forWhite: Boolean = side == White
     val friendlyPieces    = if (forWhite) whitePieces else blackPieces
     val enemyPieces       = if (forWhite) blackPieces else whitePieces
@@ -314,8 +315,17 @@ case class Board(
       }
     } yield move
 
-    if (isCheck(side)) regularMoves
-    else regularMoves ++ generateCastlingMoves(side)
+    val inCheck = isCheck(side)
+    logger.debug(s"Side is in check: $inCheck")
+
+    if (inCheck)
+      logger.debug("In check - skipping castling moves")
+      regularMoves
+    else
+      logger.debug("Not in check - including castling moves")
+      val castlingMoves = generateCastlingMoves(side).toList
+      logger.debug(s"Generated castling moves: $castlingMoves")
+      regularMoves ++ generateCastlingMoves(side)
   }
 
   private def generateCastlingMoves(side: Side): Iterator[Move] = {
@@ -323,16 +333,23 @@ case class Board(
     val rank              = if (forWhite) 0 else 7
     val kingSquare        = rank * 8 + 4
 
-    // First check if there's actually a king at the expected square
+    logger.debug(s"Generating castling moves for $side")
+    logger.debug(s"Looking for king at square $kingSquare")
+
     getPiece(kingSquare) match {
       case Some(king) =>
-        (if (canCastleKingside(side))
+        logger.debug(s"Found king: $king")
+        val kingsidePossible = canCastleKingside(side)
+        logger.debug(s"Kingside castle possible: $kingsidePossible")
+
+        (if (kingsidePossible)
            Iterator.single(Move(kingSquare, kingSquare + 2, king, isCastling = true))
          else Iterator.empty) ++
           (if (canCastleQueenside(side))
              Iterator.single(Move(kingSquare, kingSquare - 2, king, isCastling = true))
            else Iterator.empty)
       case None =>
+        logger.debug(s"No king found at square $kingSquare")
         Iterator.empty
     }
   }
@@ -498,14 +515,21 @@ case class Board(
   def canCastleKingside(side: Side): Boolean = {
     val rank   = if (side == White) 0 else 7
     val rights = if (side == White) castlingRights & 0x1 else castlingRights & 0x4
+    logger.debug(s"Checking kingside castle for $side")
+    logger.debug(s"Castling rights check: ${rights != 0}")
+
     if (rights == 0) return false
 
-    // Check squares between king and rook are empty
-    val squares = Array(rank * 8 + 5, rank * 8 + 6)
-    if (squares.exists(sq => getBit(occupied, sq))) return false
+    val squares      = Array(rank * 8 + 5, rank * 8 + 6) // F1,G1 for white
+    val squaresEmpty = !squares.exists(sq => getBit(occupied, sq))
+    logger.debug(s"Intermediate squares empty: $squaresEmpty")
 
-    // Verify squares king moves through aren't attacked
-    squares.forall(sq => !isSquareAttacked(sq, side.opposite))
+    if (!squaresEmpty) return false
+
+    val squaresNotAttacked = squares.forall(sq => !isSquareAttacked(sq, side.opposite))
+    logger.debug(s"Squares not under attack: $squaresNotAttacked")
+
+    squaresNotAttacked
   }
 
   def canCastleQueenside(side: Side): Boolean = {
