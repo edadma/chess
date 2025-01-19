@@ -39,6 +39,26 @@ class BoardStateTests extends AnyFreeSpec with Matchers {
     }
   }
 
+  "Board.fromString" - {
+    "parse initial position" in {
+      val layout =
+        """
+          |r  n  b  q  k  b  n  r
+          |p  p  p  p  p  p  p  p
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |P  P  P  P  P  P  P  P
+          |R  N  B  Q  K  B  N  R
+      """.stripMargin.trim
+
+      val board = Board.fromString(layout)
+      board.blackRooks should be(0x8100000000000000L)
+      board.whitePawns should be(0xff00L)
+    }
+  }
+
   "Custom Position" - {
     "should load correctly from string representation" in {
       val layout = """
