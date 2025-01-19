@@ -102,6 +102,18 @@ case class Move(
     isCastling: Boolean = false,
 )
 
+sealed trait Side {
+  def opposite: Side
+}
+
+case object White extends Side {
+  def opposite: Side = Black
+}
+
+case object Black extends Side {
+  def opposite: Side = White
+}
+
 // Enumeration for pieces
 sealed trait Piece { def isWhite: Boolean }
 case object WhitePawn   extends Piece { def isWhite = true  }
@@ -130,7 +142,6 @@ case class Board(
     blackRooks: Long = 0x8100000000000000L,
     blackQueens: Long = 0x800000000000000L,
     blackKing: Long = 0x1000000000000000L,
-    whiteToMove: Boolean = true,
     castlingRights: Int = 0xf, // KQkq in binary
     enPassantSquare: Option[Int] = None,
     halfMoveClock: Int = 0,
@@ -207,9 +218,10 @@ case class Board(
   private def getQueenAttacks(square: Int): Long =
     getBishopAttacks(square) | getRookAttacks(square)
 
-  def generateMoves(forWhite: Boolean): Iterator[Move] = {
-    val friendlyPieces = if (forWhite) whitePieces else blackPieces
-    val enemyPieces    = if (forWhite) blackPieces else whitePieces
+  def generateMoves(side: Side): Iterator[Move] = {
+    val forWhite: Boolean = side == White
+    val friendlyPieces    = if (forWhite) whitePieces else blackPieces
+    val enemyPieces       = if (forWhite) blackPieces else whitePieces
     val promotionPieces = if (forWhite)
       List(WhiteQueen, WhiteRook, WhiteBishop, WhiteKnight)
     else
@@ -221,7 +233,7 @@ case class Board(
       piece = getPiece(fromSquare).get
       possibleMoves = piece match {
         case WhitePawn | BlackPawn =>
-          generatePawnMoves(fromSquare)
+          generatePawnMoves(fromSquare, side)
         case WhiteKnight | BlackKnight =>
           KNIGHT_MOVES(fromSquare) & ~friendlyPieces
         case WhiteBishop | BlackBishop =>
@@ -258,7 +270,7 @@ case class Board(
       }
     } yield move
 
-    if (isInCheck(whiteToMove)) regularMoves
+    if (isInCheck(forWhite)) regularMoves
     else regularMoves ++ generateCastlingMoves(forWhite)
   }
 
@@ -272,8 +284,9 @@ case class Board(
        else Iterator.empty)
   }
 
-  private def generatePawnMoves(square: Int): Long = {
-    var moves = 0L
+  private def generatePawnMoves(square: Int, side: Side): Long = {
+    val whiteToMove = side == White
+    var moves       = 0L
     val (singlePush, doublePush, leftCapture, rightCapture) =
       if (whiteToMove) (8, 16, 7, 9) else (-8, -16, -9, -7)
 
@@ -329,10 +342,8 @@ case class Board(
   }
 
   // Check detection
-  def isInCheck(whiteKing: Boolean): Boolean =
-    isSquareAttacked(if (whiteKing) whiteKingSquare else blackKingSquare, whiteKing)
-
-  def isCheckmate: Boolean = isInCheck(whiteToMove) && !hasLegalMoves
+  def isInCheck(side: Side): Boolean =
+    isSquareAttacked(if (side == White) whiteKingSquare else blackKingSquare, side == White)
 
   // Like makeMove but only updates piece positions - for check testing
   private def makeTestMove(move: Move): Board = {
@@ -367,7 +378,8 @@ case class Board(
     )
   }
 
-  private def isSquareAttacked(square: Int, byWhite: Boolean): Boolean = {
+  private def isSquareAttacked(square: Int, side: Side): Boolean = {
+    val byWhite      = side == White
     val enemyPawns   = if (byWhite) blackPawns else whitePawns
     val enemyKnights = if (byWhite) blackKnights else whiteKnights
     val enemyBishops = if (byWhite) blackBishops else whiteBishops
@@ -397,19 +409,15 @@ case class Board(
     (KING_MOVES(square) & enemyKing) != 0
   }
 
-  def isStalemate(forWhite: Boolean): Boolean = {
+  def isStalemate(side: Side): Boolean = {
     // Not stalemate if in check
-    if (isInCheck(forWhite)) return false
+    if (isInCheck(side)) return false
 
     // Stalemate if no legal moves and not in check
-    !hasLegalMoves
+    !hasLegalMoves(side)
   }
 
-  def isStalemate: Boolean = isStalemate(whiteToMove)
-
-  def hasLegalMoves: Boolean = hasLegalMoves(whiteToMove)
-
-  def hasLegalMoves(forWhite: Boolean): Boolean = generateLegalMoves(forWhite).nonEmpty
+  def hasLegalMoves(side: Side): Boolean = generateLegalMoves(side).nonEmpty
 
   def hasInsufficientMaterial: Boolean = {
     // King vs King
@@ -427,14 +435,10 @@ case class Board(
     false
   }
 
-  def generateMoves: Iterator[Move] = generateMoves(whiteToMove)
-
-  def generateLegalMoves: Iterator[Move] = generateLegalMoves(whiteToMove)
-
-  def generateLegalMoves(forWhite: Boolean): Iterator[Move] = {
-    generateMoves.filter(move => {
+  def generateLegalMoves(side: Side): Iterator[Move] = {
+    generateMoves(side).filter(move => {
       val newBoard = makeTestMove(move)
-      !newBoard.isInCheck(whiteToMove)
+      !newBoard.isInCheck(side)
     })
   }
 
