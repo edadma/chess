@@ -325,63 +325,6 @@ case class Board(
     }
   }
 
-//  private def generatePawnMoves(square: Int, side: Side): Long = {
-//    val whiteToMove = side == White
-//    var moves       = 0L
-//    val (singlePush, doublePush, leftCapture, rightCapture) =
-//      if (whiteToMove) (8, 16, 7, 9) else (-8, -16, -9, -7)
-//
-//    // Get enemy pieces for captures
-//    val enemyPieces = if (whiteToMove) blackPieces else whitePieces
-//
-//    // Check if pawn is on promotion rank
-//    val onPromotionRank = (whiteToMove && square / 8 == 6) || (!whiteToMove && square / 8 == 1)
-//
-//    // Single push (only to empty squares)
-//    if (!getBit(occupied, square + singlePush)) {
-//      moves = setBit(moves, square + singlePush)
-//
-//      // Double push from starting rank (only if not on promotion rank)
-//      if (
-//        !onPromotionRank &&
-//        ((whiteToMove && square / 8 == 1) || (!whiteToMove && square / 8 == 6))
-//      ) {
-//        if (!getBit(occupied, square + doublePush)) {
-//          moves = setBit(moves, square + doublePush)
-//        }
-//      }
-//    }
-//
-//    // Captures
-//    if (square % 8 > 0 && getBit(enemyPieces, square + leftCapture)) {
-//      moves = setBit(moves, square + leftCapture)
-//    }
-//    if (square % 8 < 7 && getBit(enemyPieces, square + rightCapture)) {
-//      moves = setBit(moves, square + rightCapture)
-//    }
-//
-//    // En passant captures (existing code)
-//    enPassantSquare.foreach { epSquare =>
-//      lastMove.foreach { move =>
-//        if (
-//          (move.piece == WhitePawn && !whiteToMove) ||
-//          (move.piece == BlackPawn && whiteToMove)
-//        ) {
-//          if (math.abs(move.to - move.from) == 16) {
-//            if (
-//              square % 8 > 0 && epSquare == square + leftCapture ||
-//              square % 8 < 7 && epSquare == square + rightCapture
-//            ) {
-//              moves = setBit(moves, epSquare)
-//            }
-//          }
-//        }
-//      }
-//    }
-//
-//    moves
-//  }
-
   private def generatePawnMoves(square: Int, side: Side): Long = {
     val whiteToMove = side == White
     var moves       = 0L
