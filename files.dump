@@ -12,7 +12,10 @@ nodejs.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
+BoardStateTests.scala
+ChessSpec.scala
 GameTests.scala
+PieceMovementTests.scala
 
 # build files
 ./
