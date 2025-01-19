@@ -116,7 +116,7 @@ class PieceMovementTests extends ChessSpec {
     }
 
     "King" - {
-      "allow castling kingside" in withDebugLogging("allow castling kingside") {
+      "allow castling kingside" in /*withDebugLogging("allow castling kingside")*/ {
         val board = Board.fromString("""
                                        |.  .  .  .  k  .  .  r
                                        |.  .  .  .  .  .  .  .
@@ -139,20 +139,20 @@ class PieceMovementTests extends ChessSpec {
         moves should contain(Move(E1, G1, WhiteKing, None, None, false, true))
       }
 
-//      "not allow castling through check" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  k  .  .  r
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  p  .
-//                                       |.  .  .  .  K  .  .  R
-//       """.stripMargin.trim)
-//
-//        board.generateMoves(White).toList should not contain (Move(4, 6, WhiteKing, isCastling = true))
-//      }
+      "not allow castling through check" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  k  .  .  r
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  p  .
+                                       |.  .  .  .  K  .  .  R
+       """.stripMargin.trim)
+
+        board.generateMoves(White).toList should not contain (Move(D1, F1, WhiteKing, isCastling = true))
+      }
     }
   }
 }
