@@ -208,14 +208,11 @@ case class Board(
   private val BISHOP_DELTAS = Array((-1, -1), (-1, 1), (1, -1), (1, 1))
   private val ROOK_DELTAS   = Array((-1, 0), (1, 0), (0, -1), (0, 1))
 
-  private def getBishopAttacks(square: Int): Long =
-    getRayAttacks(square, occupied, BISHOP_DELTAS)
+  def getBishopAttacks(square: Int): Long = getRayAttacks(square, occupied, BISHOP_DELTAS)
 
-  private def getRookAttacks(square: Int): Long =
-    getRayAttacks(square, occupied, ROOK_DELTAS)
+  def getRookAttacks(square: Int): Long = getRayAttacks(square, occupied, ROOK_DELTAS)
 
-  private def getQueenAttacks(square: Int): Long =
-    getBishopAttacks(square) | getRookAttacks(square)
+  def getQueenAttacks(square: Int): Long = getBishopAttacks(square) | getRookAttacks(square)
 
   def generateMoves(side: Side): Iterator[Move] = {
     val forWhite: Boolean = side == White
@@ -442,7 +439,7 @@ case class Board(
     })
   }
 
-  private def canCastleKingside(side: Side): Boolean = {
+  def canCastleKingside(side: Side): Boolean = {
     val rank   = if (side == White) 0 else 7
     val rights = if (side == White) castlingRights & 0x1 else castlingRights & 0x4
     if (rights == 0) return false
@@ -455,7 +452,7 @@ case class Board(
     squares.forall(sq => !isSquareAttacked(sq, side.opposite))
   }
 
-  private def canCastleQueenside(side: Side): Boolean = {
+  def canCastleQueenside(side: Side): Boolean = {
     val rank   = if (side == White) 0 else 7
     val rights = if (side == White) castlingRights & 0x2 else castlingRights & 0x8
     if (rights == 0) return false
