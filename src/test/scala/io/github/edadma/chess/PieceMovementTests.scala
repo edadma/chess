@@ -3,6 +3,43 @@ package io.github.edadma.chess
 import Board.*
 
 class PieceMovementTests extends ChessSpec {
+  "Castling through check" in {
+    val board = Board.fromString(
+      """
+        |.  .  .  .  k  .  .  r
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |r  .  .  .  K  .  .  R
+      """.stripMargin.trim,
+    )
+
+    // Black rook attacks e1, preventing kingside castle
+    board.generateMoves(White).filter(_.isCastling) shouldBe empty
+  }
+
+  "Queenside castling with blocked squares" in {
+    val board = Board.fromString(
+      """
+        |.  .  .  .  k  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |R  .  N  .  K  .  .  R
+      """.stripMargin.trim,
+    )
+
+    // Knight blocks queenside castling
+    val moves = board.generateMoves(White).filter(_.isCastling).toList
+    moves.map(_.to) should contain only (G1) // Only kingside should be possible
+  }
+
   "Piece movement" - {
     "Pawn promotion" in {
       val board = Board.fromString(
