@@ -266,7 +266,7 @@ case class Board(
       }
     } yield move
 
-    if (isInCheck(side)) regularMoves
+    if (isCheck(side)) regularMoves
     else regularMoves ++ generateCastlingMoves(side)
   }
 
@@ -339,11 +339,10 @@ case class Board(
   }
 
   // Check detection
-  def isInCheck(side: Side): Boolean =
+  def isCheck(side: Side): Boolean =
     isSquareAttacked(if (side == White) whiteKingSquare else blackKingSquare, side)
 
-  // Like makeMove but only updates piece positions - for check testing
-  private def makeTestMove(move: Move): Board = {
+  def makeMove(move: Move): Board = {
     def updateBitboard(bb: Long, from: Int, to: Int): Long = {
       if (getBit(bb, from)) setBit(clearBit(bb, from), to) else bb
     }
@@ -408,7 +407,7 @@ case class Board(
 
   def isStalemate(side: Side): Boolean = {
     // Not stalemate if in check
-    if (isInCheck(side)) return false
+    if (isCheck(side)) return false
 
     // Stalemate if no legal moves and not in check
     !hasLegalMoves(side)
@@ -434,8 +433,9 @@ case class Board(
 
   def generateLegalMoves(side: Side): Iterator[Move] = {
     generateMoves(side).filter(move => {
-      val newBoard = makeTestMove(move)
-      !newBoard.isInCheck(side)
+      val newBoard = makeMove(move)
+
+      !newBoard.isCheck(side)
     })
   }
 
