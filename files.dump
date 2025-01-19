@@ -4,6 +4,7 @@
 ./src/main/scala/io/github/edadma/chess
 Board.scala
 Game.scala
+package.scala
 
 # game REPL
 Main.scala

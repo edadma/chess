@@ -1,10 +1,8 @@
 package io.github.edadma.chess
 
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
 import Board.*
 
-class PieceMovementTests extends AnyFreeSpec with Matchers {
+class PieceMovementTests extends ChessSpec {
   "Piece movement" - {
     "Pawn" - {
       val startingBoard = Board.fromString("""
@@ -118,7 +116,7 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
     }
 
     "King" - {
-      "allow castling kingside" in {
+      "allow castling kingside" in withDebugLogging("allow castling kingside") {
         val board = Board.fromString("""
                                        |.  .  .  .  k  .  .  r
                                        |.  .  .  .  .  .  .  .
@@ -130,7 +128,7 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
                                        |.  .  .  .  K  .  .  R
        """.stripMargin.trim)
 
-        board.generateMoves(White).toList should contain(Move(4, 6, WhiteKing, isCastling = true))
+        board.generateMoves(White).toList should contain(Move(E1, G1, WhiteKing, isCastling = true))
       }
 
 //      "not allow castling through check" in {
