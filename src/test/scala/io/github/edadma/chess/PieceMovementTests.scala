@@ -68,31 +68,12 @@ class PieceMovementTests extends ChessSpec {
     "Knight" - {
       "Knight near board edges" in withDebugLogging("Knight near board edges") {
         // Test H8 corner knight first, with only one knight on the board
-        val cornerBoard = Board.fromString(
-          """
-            |.  .  .  .  .  .  .  N
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
-          """.stripMargin.trim,
-        )
-
-        logger.debug("Testing H8 knight moves")
-        val h8Moves = cornerBoard.generateMoves(White).filter(_.from == H8).toSet
-        logger.debug(s"Generated moves from H8: ${h8Moves.map(m => s"${toAlgebraic(m.from)}->${toAlgebraic(m.to)}")}")
-        h8Moves.map(_.to) should contain only (F7, G6)
-
-//        // Test A4 edge knight separately
-//        val edgeBoard = Board.fromString(
+//        val cornerBoard = Board.fromString(
 //          """
+//            |.  .  .  .  .  .  .  N
 //            |.  .  .  .  .  .  .  .
 //            |.  .  .  .  .  .  .  .
 //            |.  .  .  .  .  .  .  .
-//            |N  .  .  .  .  .  .  .
 //            |.  .  .  .  .  .  .  .
 //            |.  .  .  .  .  .  .  .
 //            |.  .  .  .  .  .  .  .
@@ -100,9 +81,35 @@ class PieceMovementTests extends ChessSpec {
 //          """.stripMargin.trim,
 //        )
 //
-//        val a4Moves = edgeBoard.generateMoves(White).filter(_.from == A4).toSet
-//        a4Moves.map(_.to) should contain only (B6, C5, C3, B2)
-//
+//        logger.debug("Testing H8 knight moves")
+//        val h8Moves = cornerBoard.generateMoves(White).filter(_.from == H8).toSet
+//        logger.debug(s"Generated moves from H8: ${h8Moves.map(m => s"${toAlgebraic(m.from)}->${toAlgebraic(m.to)}")}")
+//        h8Moves.map(_.to) should contain only (F7, G6)
+
+        // Test A4 edge knight separately
+        val a4Board = Board.fromString(
+          """
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |N  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+          """.stripMargin.trim,
+        )
+
+        logger.debug(s"Board string parsed, checking A4 position...")
+        val a4Square = A4 // This should be 24
+        logger.debug(s"A4 square number: $a4Square")
+        logger.debug(s"Is knight present? ${a4Board.getPiece(a4Square)}")
+
+        val a4Moves = a4Board.generateMoves(White).filter(_.from == a4Square).toSet
+        logger.debug(s"Generated moves from A4: ${a4Moves.map(m => s"${toAlgebraic(m.from)}->${toAlgebraic(m.to)}")}")
+
+        a4Moves.map(_.to) should contain only (B6, C5, C3, B2)
+
 //        // Test H1 corner knight
 //        val h1Board = Board.fromString(
 //          """
@@ -119,7 +126,7 @@ class PieceMovementTests extends ChessSpec {
 //
 //        val h1Moves = h1Board.generateMoves(White).filter(_.from == H1).toSet
 //        h1Moves.map(_.to) should contain only (F2, G3)
-//
+
 //        // Test A1 corner knight
 //        val a1Board = Board.fromString(
 //          """
