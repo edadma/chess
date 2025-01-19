@@ -81,14 +81,14 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
        """.stripMargin.trim)
 
         val moves = board.generateMoves(White).toSet
-        moves should contain(Move(27, 10, WhiteKnight))
-        moves should contain(Move(27, 12, WhiteKnight))
-        moves should contain(Move(27, 17, WhiteKnight))
-        moves should contain(Move(27, 21, WhiteKnight))
-        moves should contain(Move(27, 33, WhiteKnight))
-        moves should contain(Move(27, 37, WhiteKnight))
-        moves should contain(Move(27, 42, WhiteKnight))
-        moves should contain(Move(27, 44, WhiteKnight))
+        moves should contain(Move(D4, 10, WhiteKnight))
+        moves should contain(Move(D4, 12, WhiteKnight))
+        moves should contain(Move(D4, 17, WhiteKnight))
+        moves should contain(Move(D4, 21, WhiteKnight))
+        moves should contain(Move(D4, 33, WhiteKnight))
+        moves should contain(Move(D4, 37, WhiteKnight))
+        moves should contain(Move(D4, 42, WhiteKnight))
+        moves should contain(Move(D4, 44, WhiteKnight))
       }
     }
 
@@ -117,22 +117,22 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
       }
     }
 
-//    "King" - {
-//      "allow castling kingside" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  k  .  .  r
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  K  .  .  R
-//       """.stripMargin.trim)
-//
-//        board.generateMoves(White).toList should contain(Move(4, 6, WhiteKing, isCastling = true))
-//      }
-//
+    "King" - {
+      "allow castling kingside" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  k  .  .  r
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  K  .  .  R
+       """.stripMargin.trim)
+
+        board.generateMoves(White).toList should contain(Move(4, 6, WhiteKing, isCastling = true))
+      }
+
 //      "not allow castling through check" in {
 //        val board = Board.fromString("""
 //                                       |.  .  .  .  k  .  .  r
@@ -147,6 +147,6 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
 //
 //        board.generateMoves(White).toList should not contain (Move(4, 6, WhiteKing, isCastling = true))
 //      }
-//    }
+    }
   }
 }
