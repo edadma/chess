@@ -67,7 +67,7 @@ class BoardStateTests extends AnyFreeSpec with Matchers {
   "Bitboards" - {
     "should track occupied squares correctly" in {
       val board = Board()
-      board.occupied shouldBe (board.whitePieces | board.blackPieces)
+      board.occupied shouldBe board.whitePieces | board.blackPieces
       board.empty shouldBe ~board.occupied
 
       // Test specific ranks
