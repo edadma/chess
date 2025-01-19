@@ -13,8 +13,8 @@ class PieceMovementTests extends AnyFreeSpec with Matchers {
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
-                                             |.  .  .  .  .  .  .  .
-                                             |.  .  P  .  K  .  .  .
+                                             |.  .  P  .  .  .  .  .
+                                             |.  .  .  .  K  .  .  .
      """.stripMargin.trim)
 
       "allow single forward move" in {
