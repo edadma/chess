@@ -63,4 +63,35 @@ class BoardStateTests extends AnyFreeSpec with Matchers {
       board.getPiece(60) shouldBe Some(BlackKing)
     }
   }
+
+  "Bitboards" - {
+    "should track occupied squares correctly" in {
+      val board = Board()
+      board.occupied shouldBe (board.whitePieces | board.blackPieces)
+      board.empty shouldBe ~board.occupied
+
+      // Test specific ranks
+      (board.occupied & 0xffL) shouldBe 0xffL               // First rank full
+      (board.occupied & (0xffL << 8)) shouldBe (0xffL << 8) // Second rank full
+      (board.occupied & (0xffL << 32)) shouldBe 0L          // Middle ranks empty
+    }
+
+    "should track piece bitboards correctly" in {
+      val board = Board()
+
+      board.whitePawns shouldBe 0xff00L
+      board.whiteKnights shouldBe 0x42L
+      board.whiteBishops shouldBe 0x24L
+      board.whiteRooks shouldBe 0x81L
+      board.whiteQueens shouldBe 0x8L
+      board.whiteKing shouldBe 0x10L
+
+      board.blackPawns shouldBe 0xff000000000000L
+      board.blackKnights shouldBe 0x4200000000000000L
+      board.blackBishops shouldBe 0x2400000000000000L
+      board.blackRooks shouldBe 0x8100000000000000L
+      board.blackQueens shouldBe 0x800000000000000L
+      board.blackKing shouldBe 0x1000000000000000L
+    }
+  }
 }
