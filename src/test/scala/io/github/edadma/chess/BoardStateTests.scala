@@ -114,4 +114,41 @@ class BoardStateTests extends AnyFreeSpec with Matchers {
       board.blackKing shouldBe 0x1000000000000000L
     }
   }
+
+  "Board validation" - {
+    "reject boards with wrong number of rows" in {
+      val badLayout =
+        """
+          |r  n  b  q  k  b  n  r
+          |p  p  p  p  p  p  p  p
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |P  P  P  P  P  P  P  P
+          |R  N  B  Q  K  B  N  R
+     """.stripMargin.trim
+
+      intercept[IllegalArgumentException] {
+        Board.fromString(badLayout)
+      }
+    }
+
+    "reject invalid piece characters" in {
+      val badPiece =
+        """
+          |r  n  b  q  k  b  n  r
+          |p  p  p  p  p  p  p  p
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  x  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |P  P  P  P  P  P  P  P
+          |R  N  B  Q  K  B  N  R
+     """.stripMargin.trim
+
+      intercept[IllegalArgumentException] {
+        Board.fromString(badPiece)
+      }
+    }
+  }
 }
