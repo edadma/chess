@@ -195,9 +195,9 @@ case class Board(
   private lazy val blackKingSquare: Int = 63 - java.lang.Long.numberOfLeadingZeros(blackKing)
 
   // Helper methods for bit manipulation
-  private def getBit(bitboard: Long, square: Int): Boolean = ((bitboard >>> square) & 1L) == 1L
-  private def setBit(bitboard: Long, square: Int): Long    = bitboard | (1L << square)
-  private def clearBit(bitboard: Long, square: Int): Long  = bitboard & ~(1L << square)
+  private[chess] def getBit(bitboard: Long, square: Int): Boolean = ((bitboard >>> square) & 1L) == 1L
+  private[chess] def setBit(bitboard: Long, square: Int): Long    = bitboard | (1L << square)
+  private[chess] def clearBit(bitboard: Long, square: Int): Long  = bitboard & ~(1L << square)
 
   // Get piece at square
   def getPiece(square: Int): Option[Piece] = {

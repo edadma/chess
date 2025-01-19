@@ -128,7 +128,15 @@ class PieceMovementTests extends ChessSpec {
                                        |.  .  .  .  K  .  .  R
        """.stripMargin.trim)
 
-        board.generateMoves(White).toList should contain(Move(E1, G1, WhiteKing, isCastling = true))
+        logger.debug(s"Castling rights: ${board.castlingRights}")
+        logger.debug("Checking if squares F1 and G1 are empty")
+        logger.debug(s"F1 occupied: ${board.getBit(board.occupied, F1)}")
+        logger.debug(s"G1 occupied: ${board.getBit(board.occupied, G1)}")
+
+        val moves = board.generateMoves(White).toList
+        logger.debug(s"Generated moves: ${moves.mkString("\n  ", "\n  ", "")}")
+
+        moves should contain(Move(E1, G1, WhiteKing, None, None, false, true))
       }
 
 //      "not allow castling through check" in {
