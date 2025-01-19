@@ -263,6 +263,42 @@ case class Board(
 //    attacks
 //  }
 
+//  def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
+//    var attacks  = 0L
+//    val fromFile = square % 8
+//    val fromRank = square / 8
+//    logger.debug(s"Getting ray attacks from rank $fromRank, file $fromFile (${toAlgebraic(square)})")
+//
+//    for ((dx, dy) <- deltas) {
+//      logger.debug(s"Processing delta: ($dx, $dy)")
+//      var x        = fromFile
+//      var y        = fromRank
+//      var continue = true
+//      while (continue) {
+//        val nextX = x + dx
+//        val nextY = y + dy
+//        logger.debug(s"At ($x,$y) moving to ($nextX,$nextY)")
+//        if (nextX < 0 || nextX > 7 || nextY < 0 || nextY > 7) {
+//          logger.debug("Hit board edge")
+//          continue = false
+//        } else {
+//          val targetSquare = nextY * 8 + nextX
+//          logger.debug(s"Moving to square $targetSquare (${toAlgebraic(targetSquare)})")
+//          val isOccupied = getBit(occupied, targetSquare)
+//          logger.debug(s"Square ${toAlgebraic(targetSquare)} ($targetSquare) occupied? $isOccupied")
+//          attacks = setBit(attacks, targetSquare)
+//          if (isOccupied) {
+//            logger.debug(s"Hit piece at ${toAlgebraic(targetSquare)}")
+//            continue = false
+//          }
+//          x = nextX
+//          y = nextY
+//        }
+//      }
+//    }
+//    attacks
+//  }
+
   def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
     var attacks  = 0L
     val fromFile = square % 8
@@ -286,10 +322,13 @@ case class Board(
           logger.debug(s"Moving to square $targetSquare (${toAlgebraic(targetSquare)})")
           val isOccupied = getBit(occupied, targetSquare)
           logger.debug(s"Square ${toAlgebraic(targetSquare)} ($targetSquare) occupied? $isOccupied")
-          attacks = setBit(attacks, targetSquare)
+
           if (isOccupied) {
             logger.debug(s"Hit piece at ${toAlgebraic(targetSquare)}")
+            attacks = setBit(attacks, targetSquare)
             continue = false
+          } else {
+            attacks = setBit(attacks, targetSquare)
           }
           x = nextX
           y = nextY

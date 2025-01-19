@@ -69,32 +69,17 @@ class PieceMovementTests extends ChessSpec {
       val targetSquares = moves.map(_.to)
       logger.debug(s"Target squares: ${targetSquares.map(toAlgebraic)}")
 
-      // Let's also log the expected squares we're checking for
-      val expectedSquares = Set(
-        C6, // Up-left (then blocked by black pawn)
-        E6,
-        F7,
-        G8, // Up-right diagonal (until edge)
-        E4, // Down-right (blocked by white pawn)
-        C4,
-        B3,
-        A2, // Down-left diagonal (until edge)
-      )    // Up-left diagonal (until friendly piece)
-
-      logger.debug(s"Expected squares: ${expectedSquares.map(toAlgebraic)}")
-
       moves.map(_.to) should contain only (
         C6,
-        B5,
-        A4, // Down-left diagonal
+        B7,
+        A8,
         E6,
         F7,
-        G8, // Up-right diagonal
+        G8,
         C4,
         B3,
-        A2, // Down-right diagonal
-        E4,
-      ) // Up-left diagonal
+        A2,
+      )
     }
 
     "Pawn" - {
