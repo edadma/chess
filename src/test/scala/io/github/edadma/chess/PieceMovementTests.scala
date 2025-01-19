@@ -2,23 +2,24 @@ package io.github.edadma.chess
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
+import Board.*
 
 class PieceMovementTests extends AnyFreeSpec with Matchers {
   "Piece movement" - {
     "Pawn" - {
       val startingBoard = Board.fromString("""
-                                             |.  .  .  .  k  .  .  .
+                                             |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  .  .  .  .  .  .
                                              |.  .  P  .  .  .  .  .
-                                             |.  .  .  .  K  .  .  .
+                                             |.  .  .  .  .  .  .  .
      """.stripMargin.trim)
 
       "allow single forward move" in {
-        startingBoard.generateMoves(White).toList should contain(Move(18, 26, WhitePawn))
+        startingBoard.generateMoves(White).toList should contain(Move(C2, C3, WhitePawn))
       }
 
 //      "allow double move from starting position" in {

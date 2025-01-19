@@ -1,6 +1,42 @@
 package io.github.edadma.chess
 
 object Board {
+  // Square constants
+  val A1 = 0; val B1  = 1; val C1  = 2; val D1  = 3; val E1  = 4; val F1  = 5; val G1  = 6; val H1  = 7
+  val A2 = 8; val B2  = 9; val C2  = 10; val D2 = 11; val E2 = 12; val F2 = 13; val G2 = 14; val H2 = 15
+  val A3 = 16; val B3 = 17; val C3 = 18; val D3 = 19; val E3 = 20; val F3 = 21; val G3 = 22; val H3 = 23
+  val A4 = 24; val B4 = 25; val C4 = 26; val D4 = 27; val E4 = 28; val F4 = 29; val G4 = 30; val H4 = 31
+  val A5 = 32; val B5 = 33; val C5 = 34; val D5 = 35; val E5 = 36; val F5 = 37; val G5 = 38; val H5 = 39
+  val A6 = 40; val B6 = 41; val C6 = 42; val D6 = 43; val E6 = 44; val F6 = 45; val G6 = 46; val H6 = 47
+  val A7 = 48; val B7 = 49; val C7 = 50; val D7 = 51; val E7 = 52; val F7 = 53; val G7 = 54; val H7 = 55
+  val A8 = 56; val B8 = 57; val C8 = 58; val D8 = 59; val E8 = 60; val F8 = 61; val G8 = 62; val H8 = 63
+
+  // Convert algebraic notation (e.g. "e4") to board index (0-63)
+  def fromAlgebraic(s: String): Option[Int] = {
+    if (s.length != 2) return None
+
+    val file = s(0).toLower - 'a'
+    val rank = s(1).asDigit - 1
+
+    if (file < 0 || file > 7 || rank < 0 || rank > 7) None
+    else Some(rank * 8 + file)
+  }
+
+  // Convert board index (0-63) to algebraic notation
+  def toAlgebraic(square: Int): String = {
+    require(square >= 0 && square < 64, "Square index must be between 0 and 63")
+    val file = ('a' + square % 8).toChar
+    val rank = (square / 8 + 1).toString
+    file.toString + rank
+  }
+
+  // For easier testing - implicit conversion from string to index
+  implicit class AlgebraicOps(s: String) {
+    def toSquare: Int = fromAlgebraic(s).getOrElse(
+      throw new IllegalArgumentException(s"Invalid algebraic notation: $s"),
+    )
+  }
+
   // Constants for board representation
   final val EMPTY_BOARD: Long = 0L
   final val FULL_BOARD: Long  = -1L // All bits set to 1
@@ -273,12 +309,20 @@ case class Board(
   private def generateCastlingMoves(side: Side): Iterator[Move] = {
     val forWhite: Boolean = side == White
     val rank              = if (forWhite) 0 else 7
-    (if (canCastleKingside(side))
-       Iterator.single(Move(rank * 8 + 4, rank * 8 + 6, getPiece(rank * 8 + 4).get, isCastling = true))
-     else Iterator.empty) ++
-      (if (canCastleQueenside(side))
-         Iterator.single(Move(rank * 8 + 4, rank * 8 + 2, getPiece(rank * 8 + 4).get, isCastling = true))
-       else Iterator.empty)
+    val kingSquare        = rank * 8 + 4
+
+    // First check if there's actually a king at the expected square
+    getPiece(kingSquare) match {
+      case Some(king) =>
+        (if (canCastleKingside(side))
+           Iterator.single(Move(kingSquare, kingSquare + 2, king, isCastling = true))
+         else Iterator.empty) ++
+          (if (canCastleQueenside(side))
+             Iterator.single(Move(kingSquare, kingSquare - 2, king, isCastling = true))
+           else Iterator.empty)
+      case None =>
+        Iterator.empty
+    }
   }
 
 //  private def generatePawnMoves(square: Int, side: Side): Long = {
@@ -394,9 +438,10 @@ case class Board(
     moves
   }
 
-  // Check detection
   def isCheck(side: Side): Boolean =
-    isSquareAttacked(if (side == White) whiteKingSquare else blackKingSquare, side)
+    val kingSquare = if (side == White) whiteKingSquare else blackKingSquare
+
+    kingSquare != -1 && isSquareAttacked(kingSquare, side)
 
   def makeMove(move: Move): Board = {
     def updateBitboard(bb: Long, from: Int, to: Int): Long = {
