@@ -96,7 +96,10 @@ object Board {
         case 'R' => whiteRooks |= bit
         case 'Q' => whiteQueens |= bit
         case 'K' => whiteKing |= bit
-        case 'p' => blackPawns |= bit
+        case 'p' =>
+          logger.debug(s"Found black pawn in source at rank=$rankIndex file=$fileIndex")
+          logger.debug(s"Calculated square = ${(7 - rankIndex)} * 8 + $fileIndex = $square (${toAlgebraic(square)})")
+          blackPawns |= bit
         case 'n' => blackKnights |= bit
         case 'b' => blackBishops |= bit
         case 'r' => blackRooks |= bit
@@ -106,6 +109,10 @@ object Board {
         case c   => throw new IllegalArgumentException(s"Invalid piece character: $c")
       }
     }
+
+    logger.debug(
+      s"Black pawns bitboard: ${String.format("%64s", java.lang.Long.toBinaryString(blackPawns)).replace(' ', '0')}",
+    )
 
     Board(
       whitePawns = whitePawns,
@@ -215,22 +222,40 @@ case class Board(
   }
 
   // Sliding piece attack generation
-//  private def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
-//    var attacks = 0L
+//  def getRayAttacks(square: Int, occupied: Long, deltas: Array[(Int, Int)]): Long = {
+//    var attacks  = 0L
+//    val fromFile = square % 8
+//    val fromRank = square / 8
+//    logger.debug(s"Getting ray attacks from rank $fromRank, file $fromFile")
+//    logger.debug(
+//      s"Occupied squares: ${String.format("%64s", java.lang.Long.toBinaryString(occupied)).replace(' ', '0')}",
+//    )
+//
 //    for ((dx, dy) <- deltas) {
-//      var x        = square % 8
-//      var y        = square / 8
+//      logger.debug(s"Processing delta: ($dx, $dy)")
+//      var x        = fromFile
+//      var y        = fromRank
 //      var continue = true
 //      while (continue) {
 //        x += dx
 //        y += dy
-//        if (x < 0 || x > 7 || y < 0 || y > 7) {
-//          continue = false // Off board
+//        logger.debug(s"Checking x=$x, y=$y")
+//        // Check if we've moved off the board OR wrapped around a file
+//        if (
+//          x < 0 || x > 7 || y < 0 || y > 7 ||
+//          (dx > 0 && x < fromFile) || // Wrapped right to left
+//          (dx < 0 && x > fromFile)
+//        ) { // Wrapped left to right
+//          logger.debug("Hit board edge")
+//          continue = false
 //        } else {
 //          val targetSquare = y * 8 + x
+//          val isOccupied   = getBit(occupied, targetSquare)
+//          logger.debug(s"Square ${toAlgebraic(targetSquare)} (square $targetSquare) occupied? $isOccupied")
 //          attacks = setBit(attacks, targetSquare)
-//          if (getBit(occupied, targetSquare)) {
-//            continue = false // Blocking piece
+//          if (isOccupied) {
+//            logger.debug(s"Hit piece at ${toAlgebraic(targetSquare)}")
+//            continue = false
 //          }
 //        }
 //      }
@@ -242,7 +267,7 @@ case class Board(
     var attacks  = 0L
     val fromFile = square % 8
     val fromRank = square / 8
-    logger.debug(s"Getting ray attacks from rank $fromRank, file $fromFile")
+    logger.debug(s"Getting ray attacks from rank $fromRank, file $fromFile (${toAlgebraic(square)})")
 
     for ((dx, dy) <- deltas) {
       logger.debug(s"Processing delta: ($dx, $dy)")
@@ -250,22 +275,24 @@ case class Board(
       var y        = fromRank
       var continue = true
       while (continue) {
-        x += dx
-        y += dy
-        logger.debug(s"Checking x=$x, y=$y")
-        // Check if we've moved off the board OR wrapped around a file
-        if (
-          x < 0 || x > 7 || y < 0 || y > 7 ||
-          (dx > 0 && x < fromFile) || // Wrapped right to left
-          (dx < 0 && x > fromFile)
-        ) { // Wrapped left to right
+        val nextX = x + dx
+        val nextY = y + dy
+        logger.debug(s"At ($x,$y) moving to ($nextX,$nextY)")
+        if (nextX < 0 || nextX > 7 || nextY < 0 || nextY > 7) {
+          logger.debug("Hit board edge")
           continue = false
         } else {
-          val targetSquare = y * 8 + x
+          val targetSquare = nextY * 8 + nextX
+          logger.debug(s"Moving to square $targetSquare (${toAlgebraic(targetSquare)})")
+          val isOccupied = getBit(occupied, targetSquare)
+          logger.debug(s"Square ${toAlgebraic(targetSquare)} ($targetSquare) occupied? $isOccupied")
           attacks = setBit(attacks, targetSquare)
-          if (getBit(occupied, targetSquare)) {
+          if (isOccupied) {
+            logger.debug(s"Hit piece at ${toAlgebraic(targetSquare)}")
             continue = false
           }
+          x = nextX
+          y = nextY
         }
       }
     }

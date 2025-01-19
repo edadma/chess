@@ -4,6 +4,99 @@ import Board.*
 
 class PieceMovementTests extends ChessSpec {
   "Piece movement" - {
+    "Pawn promotion" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  P  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+        """.stripMargin.trim,
+      )
+
+      val moves = board.generateMoves(White).filter(_.from == C7).toList
+      moves.map(_.promotion) should contain only (
+        Some(WhiteQueen),
+        Some(WhiteRook),
+        Some(WhiteBishop),
+        Some(WhiteKnight),
+      )
+    }
+
+    "Pawn blocked movement" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  p  .  .  .  .  .
+          |.  .  P  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+        """.stripMargin.trim,
+      )
+
+      val moves = board.generateMoves(White).filter(_.from == C4).toList
+      moves shouldBe empty // Pawn should be blocked
+    }
+
+    "Bishop movement and blocking" in withDebugLogging("Bishop movement and blocking") {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  B  .  .  .  .
+          |.  .  .  .  P  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+        """.stripMargin.trim,
+      )
+
+      logger.debug("Testing bishop moves")
+      val bishopSquare = D5
+      logger.debug(s"Bishop is on square ${toAlgebraic(bishopSquare)}")
+
+      val moves = board.generateMoves(White).filter(_.piece == WhiteBishop).toSet
+      logger.debug(s"Generated moves: ${moves.map(m => s"${toAlgebraic(m.from)}->${toAlgebraic(m.to)}")}")
+
+      val targetSquares = moves.map(_.to)
+      logger.debug(s"Target squares: ${targetSquares.map(toAlgebraic)}")
+
+      // Let's also log the expected squares we're checking for
+      val expectedSquares = Set(
+        C6, // Up-left (then blocked by black pawn)
+        E6,
+        F7,
+        G8, // Up-right diagonal (until edge)
+        E4, // Down-right (blocked by white pawn)
+        C4,
+        B3,
+        A2, // Down-left diagonal (until edge)
+      )    // Up-left diagonal (until friendly piece)
+
+      logger.debug(s"Expected squares: ${expectedSquares.map(toAlgebraic)}")
+
+      moves.map(_.to) should contain only (
+        C6,
+        B5,
+        A4, // Down-left diagonal
+        E6,
+        F7,
+        G8, // Up-right diagonal
+        C4,
+        B3,
+        A2, // Down-right diagonal
+        E4,
+      ) // Up-left diagonal
+    }
+
     "Pawn" - {
       val startingBoard = Board.fromString("""
                                              |.  .  .  .  .  .  .  .
