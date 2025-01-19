@@ -86,7 +86,6 @@ object Board {
       blackRooks = blackRooks,
       blackQueens = blackQueens,
       blackKing = blackKing,
-      whiteToMove = whiteToMove,
     )
   }
 }
@@ -270,16 +269,17 @@ case class Board(
       }
     } yield move
 
-    if (isInCheck(forWhite)) regularMoves
-    else regularMoves ++ generateCastlingMoves(forWhite)
+    if (isInCheck(side)) regularMoves
+    else regularMoves ++ generateCastlingMoves(side)
   }
 
-  private def generateCastlingMoves(forWhite: Boolean): Iterator[Move] = {
-    val rank = if (forWhite) 0 else 7
-    (if (canCastleKingside(forWhite))
+  private def generateCastlingMoves(side: Side): Iterator[Move] = {
+    val forWhite: Boolean = side == White
+    val rank              = if (forWhite) 0 else 7
+    (if (canCastleKingside(side))
        Iterator.single(Move(rank * 8 + 4, rank * 8 + 6, getPiece(rank * 8 + 4).get, isCastling = true))
      else Iterator.empty) ++
-      (if (canCastleQueenside(forWhite))
+      (if (canCastleQueenside(side))
          Iterator.single(Move(rank * 8 + 4, rank * 8 + 2, getPiece(rank * 8 + 4).get, isCastling = true))
        else Iterator.empty)
   }
@@ -343,7 +343,7 @@ case class Board(
 
   // Check detection
   def isInCheck(side: Side): Boolean =
-    isSquareAttacked(if (side == White) whiteKingSquare else blackKingSquare, side == White)
+    isSquareAttacked(if (side == White) whiteKingSquare else blackKingSquare, side)
 
   // Like makeMove but only updates piece positions - for check testing
   private def makeTestMove(move: Move): Board = {
@@ -378,7 +378,7 @@ case class Board(
     )
   }
 
-  private def isSquareAttacked(square: Int, side: Side): Boolean = {
+  def isSquareAttacked(square: Int, side: Side): Boolean = {
     val byWhite      = side == White
     val enemyPawns   = if (byWhite) blackPawns else whitePawns
     val enemyKnights = if (byWhite) blackKnights else whiteKnights
@@ -442,9 +442,9 @@ case class Board(
     })
   }
 
-  private def canCastleKingside(white: Boolean): Boolean = {
-    val rank   = if (white) 0 else 7
-    val rights = if (white) castlingRights & 0x1 else castlingRights & 0x4
+  private def canCastleKingside(side: Side): Boolean = {
+    val rank   = if (side == White) 0 else 7
+    val rights = if (side == White) castlingRights & 0x1 else castlingRights & 0x4
     if (rights == 0) return false
 
     // Check squares between king and rook are empty
@@ -452,12 +452,12 @@ case class Board(
     if (squares.exists(sq => getBit(occupied, sq))) return false
 
     // Verify squares king moves through aren't attacked
-    squares.forall(sq => !isSquareAttacked(sq, !white))
+    squares.forall(sq => !isSquareAttacked(sq, side.opposite))
   }
 
-  private def canCastleQueenside(white: Boolean): Boolean = {
-    val rank   = if (white) 0 else 7
-    val rights = if (white) castlingRights & 0x2 else castlingRights & 0x8
+  private def canCastleQueenside(side: Side): Boolean = {
+    val rank   = if (side == White) 0 else 7
+    val rights = if (side == White) castlingRights & 0x2 else castlingRights & 0x8
     if (rights == 0) return false
 
     // Check squares between king and rook are empty
@@ -465,6 +465,6 @@ case class Board(
     if (squares.exists(sq => getBit(occupied, sq))) return false
 
     // Verify squares king moves through aren't attacked
-    squares.take(2).forall(sq => !isSquareAttacked(sq, !white))
+    squares.take(2).forall(sq => !isSquareAttacked(sq, side.opposite))
   }
 }
