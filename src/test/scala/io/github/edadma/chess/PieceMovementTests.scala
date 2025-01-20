@@ -412,7 +412,6 @@ class PieceMovementTests extends ChessSpec {
           """.stripMargin.trim,
         )
 
-        // Black rook attacks e1, preventing kingside castle
         board.generateMoves(White).filter(_.isCastling).toList should contain only Move(
           4,
           2,
