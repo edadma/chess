@@ -405,22 +405,14 @@ class PieceMovementTests extends ChessSpec {
             |.  .  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
-            |.  b  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
+            |.  .  .  n  .  .  .  .
             |.  .  .  .  .  .  .  .
             |.  .  .  .  K  .  .  R
           """.stripMargin.trim,
         )
 
-        board.generateMoves(White).filter(_.isCastling).toList should contain only Move(
-          4,
-          2,
-          WhiteKing,
-          None,
-          None,
-          false,
-          true,
-        )
+        board.generateMoves(White).filter(_.isCastling) shouldBe empty
       }
     }
   }

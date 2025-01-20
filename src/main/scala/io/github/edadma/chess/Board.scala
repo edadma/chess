@@ -546,70 +546,6 @@ case class Board(
     )
   }
 
-  def isSquareAttacked(square: Int, side: Side): Boolean = {
-    val byWhite      = side == White
-    val enemyPawns   = if (byWhite) blackPawns else whitePawns
-    val enemyKnights = if (byWhite) blackKnights else whiteKnights
-    val enemyBishops = if (byWhite) blackBishops else whiteBishops
-    val enemyRooks   = if (byWhite) blackRooks else whiteRooks
-    val enemyQueens  = if (byWhite) blackQueens else whiteQueens
-    val enemyKing    = if (byWhite) blackKing else whiteKing
-
-    logger.debug(s"Checking if square ${toAlgebraic(square)} is attacked by $side")
-
-    // Pawn attacks
-    val pawnAttacks = if (byWhite) {
-      // If we're checking white being attacked, look at black pawn attacks going down
-      ((enemyPawns & NOT_H_FILE) >>> 9) | ((enemyPawns & NOT_A_FILE) >>> 7)
-    } else {
-      // If we're checking black being attacked, look at white pawn attacks going up
-      ((enemyPawns & NOT_H_FILE) << 7) | ((enemyPawns & NOT_A_FILE) << 9)
-    }
-    val underPawnAttack = getBit(pawnAttacks, square)
-    logger.debug(s"Under pawn attack: $underPawnAttack")
-    if (underPawnAttack) return true
-
-    // Knight attacks
-    val underKnightAttack = (KNIGHT_MOVES(square) & enemyKnights) != 0
-    logger.debug(s"Under knight attack: $underKnightAttack")
-    if (underKnightAttack) return true
-
-    // Bishop/Queen diagonal attacks
-    val fromSquare = square
-    val fromFile   = fromSquare % 8
-    val fromRank   = fromSquare / 8
-
-    // Check each diagonal direction
-    for {
-      (dx, dy) <- BISHOP_DELTAS
-      x = Iterator.iterate(fromFile)(_ + dx).takeWhile(x => x >= 0 && x <= 7)
-      y = Iterator.iterate(fromRank)(_ + dy).takeWhile(y => y >= 0 && y <= 7)
-      (currX, currY) <- x.zip(y)
-    } {
-      val targetSquare = currY * 8 + currX
-      if (getBit(enemyBishops | enemyQueens, targetSquare)) return true
-      if (getBit(occupied, targetSquare)) return false
-    }
-
-    // Rook/Queen straight attacks
-    for {
-      (dx, dy) <- ROOK_DELTAS
-      x = Iterator.iterate(fromFile)(_ + dx).takeWhile(x => x >= 0 && x <= 7)
-      y = Iterator.iterate(fromRank)(_ + dy).takeWhile(y => y >= 0 && y <= 7)
-      (currX, currY) <- x.zip(y)
-    } {
-      val targetSquare = currY * 8 + currX
-      if (getBit(enemyRooks | enemyQueens, targetSquare)) return true
-      if (getBit(occupied, targetSquare)) return false
-    }
-
-    // King attacks
-    val underKingAttack = (KING_MOVES(square) & enemyKing) != 0
-    logger.debug(s"Under king attack: $underKingAttack")
-
-    underKingAttack
-  }
-
 //  def isSquareAttacked(square: Int, side: Side): Boolean = {
 //    val byWhite      = side == White
 //    val enemyPawns   = if (byWhite) blackPawns else whitePawns
@@ -639,12 +575,33 @@ case class Board(
 //    if (underKnightAttack) return true
 //
 //    // Bishop/Queen diagonal attacks
-//    val bishopAttacks = getBishopAttacks(square)
-//    if ((bishopAttacks & (enemyBishops | enemyQueens)) != 0) return true
+//    val fromSquare = square
+//    val fromFile   = fromSquare % 8
+//    val fromRank   = fromSquare / 8
+//
+//    // Check each diagonal direction
+//    for {
+//      (dx, dy) <- BISHOP_DELTAS
+//      x = Iterator.iterate(fromFile)(_ + dx).takeWhile(x => x >= 0 && x <= 7)
+//      y = Iterator.iterate(fromRank)(_ + dy).takeWhile(y => y >= 0 && y <= 7)
+//      (currX, currY) <- x.zip(y)
+//    } {
+//      val targetSquare = currY * 8 + currX
+//      if (getBit(enemyBishops | enemyQueens, targetSquare)) return true
+//      if (getBit(occupied, targetSquare)) return false
+//    }
 //
 //    // Rook/Queen straight attacks
-//    val rookAttacks = getRookAttacks(square)
-//    if ((rookAttacks & (enemyRooks | enemyQueens)) != 0) return true
+//    for {
+//      (dx, dy) <- ROOK_DELTAS
+//      x = Iterator.iterate(fromFile)(_ + dx).takeWhile(x => x >= 0 && x <= 7)
+//      y = Iterator.iterate(fromRank)(_ + dy).takeWhile(y => y >= 0 && y <= 7)
+//      (currX, currY) <- x.zip(y)
+//    } {
+//      val targetSquare = currY * 8 + currX
+//      if (getBit(enemyRooks | enemyQueens, targetSquare)) return true
+//      if (getBit(occupied, targetSquare)) return false
+//    }
 //
 //    // King attacks
 //    val underKingAttack = (KING_MOVES(square) & enemyKing) != 0
@@ -652,6 +609,49 @@ case class Board(
 //
 //    underKingAttack
 //  }
+
+  def isSquareAttacked(square: Int, side: Side): Boolean = {
+    val byWhite      = side == White
+    val enemyPawns   = if (byWhite) blackPawns else whitePawns
+    val enemyKnights = if (byWhite) blackKnights else whiteKnights
+    val enemyBishops = if (byWhite) blackBishops else whiteBishops
+    val enemyRooks   = if (byWhite) blackRooks else whiteRooks
+    val enemyQueens  = if (byWhite) blackQueens else whiteQueens
+    val enemyKing    = if (byWhite) blackKing else whiteKing
+
+    logger.debug(s"Checking if square ${toAlgebraic(square)} is attacked by $side")
+
+    // Pawn attacks
+    val pawnAttacks = if (byWhite) {
+      // If we're checking white being attacked, look at black pawn attacks going down
+      ((enemyPawns & NOT_H_FILE) >>> 9) | ((enemyPawns & NOT_A_FILE) >>> 7)
+    } else {
+      // If we're checking black being attacked, look at white pawn attacks going up
+      ((enemyPawns & NOT_H_FILE) << 7) | ((enemyPawns & NOT_A_FILE) << 9)
+    }
+    val underPawnAttack = getBit(pawnAttacks, square)
+    logger.debug(s"Under pawn attack: $underPawnAttack")
+    if (underPawnAttack) return true
+
+    // Knight attacks
+    val underKnightAttack = (KNIGHT_MOVES(square) & enemyKnights) != 0
+    logger.debug(s"Under knight attack: $underKnightAttack")
+    if (underKnightAttack) return true
+
+    // Bishop/Queen diagonal attacks
+    val bishopAttacks = getBishopAttacks(square)
+    if ((bishopAttacks & (enemyBishops | enemyQueens)) != 0) return true
+
+    // Rook/Queen straight attacks
+    val rookAttacks = getRookAttacks(square)
+    if ((rookAttacks & (enemyRooks | enemyQueens)) != 0) return true
+
+    // King attacks
+    val underKingAttack = (KING_MOVES(square) & enemyKing) != 0
+    logger.debug(s"Under king attack: $underKingAttack")
+
+    underKingAttack
+  }
 
   def isStalemate(side: Side): Boolean = {
     // Not stalemate if in check
