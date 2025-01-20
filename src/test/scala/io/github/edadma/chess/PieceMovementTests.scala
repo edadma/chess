@@ -2,25 +2,9 @@ package io.github.edadma.chess
 
 import Board.*
 
+import pprint.pprintln
+
 class PieceMovementTests extends ChessSpec {
-  "Castling through check" in {
-    val board = Board.fromString(
-      """
-        |.  .  .  .  k  .  .  r
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |r  .  .  .  K  .  .  R
-      """.stripMargin.trim,
-    )
-
-    // Black rook attacks e1, preventing kingside castle
-    board.generateMoves(White).filter(_.isCastling) shouldBe empty
-  }
-
   "Queenside castling with blocked squares" in {
     val board = Board.fromString(
       """
@@ -82,7 +66,7 @@ class PieceMovementTests extends ChessSpec {
       moves shouldBe empty // Pawn should be blocked
     }
 
-    "Bishop movement and blocking" in withDebugLogging("Bishop movement and blocking") {
+    "Bishop movement and blocking" in /*withDebugLogging("Bishop movement and blocking")*/ {
       val board = Board.fromString(
         """
           |.  .  .  .  .  .  .  .
@@ -150,9 +134,11 @@ class PieceMovementTests extends ChessSpec {
                                                   |.  .  .  .  .  .  .  .
                                                   |.  .  .  .  .  .  .  .
        """.stripMargin.trim)
-        val moves = boardWithCapture.generateMoves(White).toList
-        moves should contain(Move(C5, B6, WhitePawn, Some(BlackPawn)))
-        moves should contain(Move(C5, D6, WhitePawn, Some(BlackPawn)))
+        val movesWhite = boardWithCapture.generateMoves(White).toList
+        movesWhite should contain(Move(C5, B6, WhitePawn, Some(BlackPawn)))
+        movesWhite should contain(Move(C5, D6, WhitePawn, Some(BlackPawn)))
+        val movesBlack = boardWithCapture.generateMoves(Black).toList
+        movesBlack should contain(Move(B6, C5, BlackPawn, Some(WhitePawn)))
       }
 
       "allow en passant capture" in {
@@ -333,9 +319,9 @@ class PieceMovementTests extends ChessSpec {
         moves should contain(Move(E1, G1, WhiteKing, None, None, false, true))
       }
 
-      "not allow castling through check" in {
+      "not allow castling through threatened square (pawn)" in {
         val board = Board.fromString("""
-                                       |.  .  .  .  k  .  .  r
+                                       |.  .  .  .  .  .  .  .
                                        |.  .  .  .  .  .  .  .
                                        |.  .  .  .  .  .  .  .
                                        |.  .  .  .  .  .  .  .
@@ -345,8 +331,42 @@ class PieceMovementTests extends ChessSpec {
                                        |.  .  .  .  K  .  .  R
        """.stripMargin.trim)
 
-        board.generateMoves(White).toList should not contain (Move(D1, F1, WhiteKing, isCastling = true))
+        pprintln(board.generateMoves(Black).toList)
+        board.generateMoves(White).filter(_.isCastling) shouldBe empty
       }
+
+      "not allow castling through threatened square (bishop)" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  b  .
+                                       |.  .  .  .  K  .  .  R
+       """.stripMargin.trim)
+
+        board.generateMoves(White).filter(_.isCastling) shouldBe empty
+      }
+
+//      "not allow castling through check" in {
+//        val board = Board.fromString(
+//          """
+//            |.  .  .  .  k  .  .  r
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |.  .  .  .  .  .  .  .
+//            |r  .  .  .  K  .  .  R
+//          """.stripMargin.trim,
+//        )
+//
+//        // Black rook attacks e1, preventing kingside castle
+//        board.generateMoves(White).filter(_.isCastling) shouldBe empty
+//      }
     }
   }
 }

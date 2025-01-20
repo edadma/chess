@@ -16,6 +16,7 @@ lazy val chess = project
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
       "io.github.edadma"  %%% "logger"          % "0.0.6",
       "org.scalatest"     %%% "scalatest"       % "3.2.19" % "test",
+      "com.lihaoyi"       %%% "pprint"          % "0.9.0"  % "test",
     ),
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
 //    Test / scalaJSUseMainModuleInitializer := true,
