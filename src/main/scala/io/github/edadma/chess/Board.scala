@@ -563,11 +563,11 @@ case class Board(
 
     // Pawn attacks
     val pawnAttacks = if (byWhite) {
-      // White pawns attack diagonally upward
-      ((enemyPawns & NOT_A_FILE) >>> 7) | ((enemyPawns & NOT_H_FILE) >>> 9)
+      // If we're checking white being attacked, look at black pawn attacks going down
+      ((enemyPawns & NOT_H_FILE) >>> 9) | ((enemyPawns & NOT_A_FILE) >>> 7)
     } else {
-      // Black pawns attack diagonally downward
-      ((enemyPawns & NOT_A_FILE) << 9) | ((enemyPawns & NOT_H_FILE) << 7)
+      // If we're checking black being attacked, look at white pawn attacks going up
+      ((enemyPawns & NOT_H_FILE) << 7) | ((enemyPawns & NOT_A_FILE) << 9)
     }
     val underPawnAttack = getBit(pawnAttacks, square)
     logger.debug(s"Under pawn attack: $underPawnAttack")
