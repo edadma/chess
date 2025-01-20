@@ -165,7 +165,7 @@ class PieceMovementTests extends ChessSpec {
         ))
       }
 
-      "correctly detect pawn attacks" in withDebugLogging("pawn attack test") {
+      "correctly detect pawn attacks" in /*withDebugLogging("pawn attack test")*/ {
         val board = Board.fromString(
           """
             |.  .  .  .  .  .  .  .
@@ -343,22 +343,37 @@ class PieceMovementTests extends ChessSpec {
         moves should contain(Move(E1, G1, WhiteKing, None, None, false, true))
       }
 
-//      "not allow castling through threatened square (pawn)" in withDebugLogging(
-//        "not allow castling through threatened square (pawn)",
-//      ) {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  p  .
-//                                       |.  .  .  .  K  .  .  R
-//       """.stripMargin.trim)
-//
-//        board.generateMoves(White).filter(_.isCastling) shouldBe empty
-//      }
+      "not allow castling through threatened square (pawn)" in withDebugLogging(
+        "not allow castling through threatened square (pawn)",
+      ) {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  p  .
+                                       |.  .  .  .  K  .  .  R
+       """.stripMargin.trim)
+
+        logger.debug(
+          s"Black pawns bitboard: ${String.format("%64s", java.lang.Long.toBinaryString(board.blackPawns)).replace(' ', '0')}",
+        )
+
+        // Test the F1 square attack explicitly
+        val f1IsAttacked = board.isSquareAttacked(Board.F1, White)
+        logger.debug(s"Is F1 square (index ${Board.F1}) attacked? $f1IsAttacked")
+
+        // Let's also check the G2 pawn's position
+        val g2HasPawn = board.getPiece(Board.G2)
+        logger.debug(s"Piece on G2 (index ${Board.G2}): $g2HasPawn")
+
+        val castlingMoves = board.generateMoves(White).filter(_.isCastling).toList
+        logger.debug(s"Generated castling moves: $castlingMoves")
+
+        castlingMoves shouldBe empty
+      }
 
 //      "not allow castling through threatened square (bishop)" in {
 //        val board = Board.fromString("""
