@@ -5,6 +5,121 @@ import Board.*
 import pprint.pprintln
 
 class PieceMovementTests extends ChessSpec {
+  "Queen" - {
+    "basic moves" - {
+      "move in all directions on empty board" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  Q  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+
+        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+
+        // Horizontal moves
+        moves should contain allOf (A5, B5, C5, E5, F5, G5, H5)
+        // Vertical moves
+        moves should contain allOf (D1, D2, D3, D4, D6, D7, D8)
+        // Diagonal moves
+        moves should contain allOf (A2, B3, C4, E6, F7, G8)     // Bottom-left to top-right
+        moves should contain allOf (A8, B7, C6, E4, F3, G2, H1) // Top-left to bottom-right
+      }
+
+      "capture enemy pieces" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  p  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  Q  .  .  .  .
+                                       |.  .  .  .  p  .  .  .
+                                       |.  .  .  .  .  n  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+
+        val moves    = board.generateMoves(White).filter(_.piece == WhiteQueen).toSet
+        val captures = moves.map(m => (m.to, m.capture))
+
+        // Should be able to capture all three black pieces
+        captures should contain allOf (
+          (D7, Some(BlackPawn)), // Vertical capture
+          (E4, Some(BlackPawn)), // Diagonal capture
+        )
+        captures should not contain (F3, Some(BlackKnight)) // Diagonal capture
+
+      }
+
+//      "be blocked by friendly pieces" in {
+//        val board = Board.fromString("""
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  P  .  .  .  .
+//                                       |.  .  .  Q  N  .  .  .
+//                                       |.  .  .  B  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+//
+//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+//
+//        // Should not be able to move through or capture friendly pieces
+//        moves should not contain allOf(D6, D4, E4)
+//        // Should be able to move in unblocked directions
+//        moves should contain allOf (C5, C4, E5)
+//      }
+    }
+
+    "complex scenarios" - {
+//      "respect pin to king" in {
+//        val board = Board.fromString("""
+//                                       |.  .  .  r  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  Q  .  .  .  .
+//                                       |.  .  .  K  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+//
+//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+//
+//        // Queen is pinned vertically - can only move up/down
+//        moves should contain only (D7, D8)
+//      }
+
+//      "prevent moves that would leave king in check" in {
+//        val board = Board.fromString("""
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  r  .  .  .  .
+//                                       |.  .  Q  K  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+//
+//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+//
+//        // Queen must block check or capture rook
+//        moves should contain only (D6)
+//      }
+
+//      "handle multiple threats" in {
+//        val board = Board.fromString("""
+//                                       |.  .  .  r  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  Q  .  b  .  .
+//                                       |.  .  .  K  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .
+//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+//
+//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+//
+//        // Queen must deal with both rook and bishop threats
+//        moves should contain only (D7, D8) // Can only move to block/capture rook
+//      }
+    }
+  }
+
   "Queenside castling with blocked squares" in {
     val board = Board.fromString(
       """
