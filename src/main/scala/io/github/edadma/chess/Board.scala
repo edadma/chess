@@ -610,6 +610,49 @@ case class Board(
     underKingAttack
   }
 
+//  def isSquareAttacked(square: Int, side: Side): Boolean = {
+//    val byWhite      = side == White
+//    val enemyPawns   = if (byWhite) blackPawns else whitePawns
+//    val enemyKnights = if (byWhite) blackKnights else whiteKnights
+//    val enemyBishops = if (byWhite) blackBishops else whiteBishops
+//    val enemyRooks   = if (byWhite) blackRooks else whiteRooks
+//    val enemyQueens  = if (byWhite) blackQueens else whiteQueens
+//    val enemyKing    = if (byWhite) blackKing else whiteKing
+//
+//    logger.debug(s"Checking if square ${toAlgebraic(square)} is attacked by $side")
+//
+//    // Pawn attacks
+//    val pawnAttacks = if (byWhite) {
+//      // If we're checking white being attacked, look at black pawn attacks going down
+//      ((enemyPawns & NOT_H_FILE) >>> 9) | ((enemyPawns & NOT_A_FILE) >>> 7)
+//    } else {
+//      // If we're checking black being attacked, look at white pawn attacks going up
+//      ((enemyPawns & NOT_H_FILE) << 7) | ((enemyPawns & NOT_A_FILE) << 9)
+//    }
+//    val underPawnAttack = getBit(pawnAttacks, square)
+//    logger.debug(s"Under pawn attack: $underPawnAttack")
+//    if (underPawnAttack) return true
+//
+//    // Knight attacks
+//    val underKnightAttack = (KNIGHT_MOVES(square) & enemyKnights) != 0
+//    logger.debug(s"Under knight attack: $underKnightAttack")
+//    if (underKnightAttack) return true
+//
+//    // Bishop/Queen diagonal attacks
+//    val bishopAttacks = getBishopAttacks(square)
+//    if ((bishopAttacks & (enemyBishops | enemyQueens)) != 0) return true
+//
+//    // Rook/Queen straight attacks
+//    val rookAttacks = getRookAttacks(square)
+//    if ((rookAttacks & (enemyRooks | enemyQueens)) != 0) return true
+//
+//    // King attacks
+//    val underKingAttack = (KING_MOVES(square) & enemyKing) != 0
+//    logger.debug(s"Under king attack: $underKingAttack")
+//
+//    underKingAttack
+//  }
+
   def isStalemate(side: Side): Boolean = {
     // Not stalemate if in check
     if (isCheck(side)) return false

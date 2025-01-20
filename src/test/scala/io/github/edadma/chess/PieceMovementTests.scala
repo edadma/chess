@@ -405,8 +405,8 @@ class PieceMovementTests extends ChessSpec {
             |.  .  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
+            |.  b  .  .  .  .  .  .
             |.  .  .  .  .  .  .  .
-            |.  .  b  .  .  .  .  .
             |.  .  .  .  .  .  .  .
             |.  .  .  .  K  .  .  R
           """.stripMargin.trim,
