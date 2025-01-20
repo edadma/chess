@@ -174,7 +174,7 @@ class PieceMovementTests extends ChessSpec {
             |.  .  .  .  .  .  .  .
             |.  .  .  .  p  .  .  .
             |.  .  .  .  .  .  .  .
-            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  p  .
             |.  .  .  .  .  .  .  .
           """.stripMargin.trim,
         )
@@ -187,6 +187,8 @@ class PieceMovementTests extends ChessSpec {
 
         logger.debug("Testing if e3 is not attacked by black pawn")
         board.isSquareAttacked(E3, White) shouldBe false // e3 should not be under attack
+
+        board.isSquareAttacked(F1, White) shouldBe true
       }
     }
 
@@ -361,18 +363,20 @@ class PieceMovementTests extends ChessSpec {
           s"Black pawns bitboard: ${String.format("%64s", java.lang.Long.toBinaryString(board.blackPawns)).replace(' ', '0')}",
         )
 
-        // Test the F1 square attack explicitly
-        val f1IsAttacked = board.isSquareAttacked(Board.F1, White)
-        logger.debug(s"Is F1 square (index ${Board.F1}) attacked? $f1IsAttacked")
+        board.canCastleKingside(White) shouldBe false
 
-        // Let's also check the G2 pawn's position
-        val g2HasPawn = board.getPiece(Board.G2)
-        logger.debug(s"Piece on G2 (index ${Board.G2}): $g2HasPawn")
-
-        val castlingMoves = board.generateMoves(White).filter(_.isCastling).toList
-        logger.debug(s"Generated castling moves: $castlingMoves")
-
-        castlingMoves shouldBe empty
+//        // Test the F1 square attack explicitly
+//        val f1IsAttacked = board.isSquareAttacked(Board.F1, White)
+//        logger.debug(s"Is F1 square (index ${Board.F1}) attacked? $f1IsAttacked")
+//
+//        // Let's also check the G2 pawn's position
+//        val g2HasPawn = board.getPiece(Board.G2)
+//        logger.debug(s"Piece on G2 (index ${Board.G2}): $g2HasPawn")
+//
+//        val castlingMoves = board.generateMoves(White).filter(_.isCastling).toList
+//        logger.debug(s"Generated castling moves: $castlingMoves")
+//
+//        castlingMoves shouldBe empty
       }
 
 //      "not allow castling through threatened square (bishop)" in {

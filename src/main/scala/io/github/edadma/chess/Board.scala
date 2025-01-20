@@ -110,10 +110,6 @@ object Board {
       }
     }
 
-    logger.debug(
-      s"Black pawns bitboard: ${String.format("%64s", java.lang.Long.toBinaryString(blackPawns)).replace(' ', '0')}",
-    )
-
     Board(
       whitePawns = whitePawns,
       whiteKnights = whiteKnights,
@@ -668,6 +664,26 @@ case class Board(
 //    squaresNotAttacked
 //  }
 
+//  def canCastleKingside(side: Side): Boolean = {
+//    val rank   = if (side == White) 0 else 7
+//    val rights = if (side == White) castlingRights & 0x1 else castlingRights & 0x4
+//    logger.debug(s"Checking kingside castle for $side")
+//    logger.debug(s"Castling rights check: ${rights != 0}")
+//
+//    if (rights == 0) return false
+//
+//    val squares      = Array(rank * 8 + 5, rank * 8 + 6) // F1,G1 for white
+//    val squaresEmpty = !squares.exists(sq => getBit(occupied, sq))
+//    logger.debug(s"Intermediate squares empty: $squaresEmpty")
+//
+//    if (!squaresEmpty) return false
+//
+//    val squaresNotAttacked = squares.forall(sq => !isSquareAttacked(sq, side.opposite))
+//    logger.debug(s"Squares not under attack: $squaresNotAttacked")
+//
+//    squaresNotAttacked
+//  }
+
   def canCastleKingside(side: Side): Boolean = {
     val rank   = if (side == White) 0 else 7
     val rights = if (side == White) castlingRights & 0x1 else castlingRights & 0x4
@@ -676,15 +692,15 @@ case class Board(
 
     if (rights == 0) return false
 
-    val squares      = Array(rank * 8 + 5, rank * 8 + 6) // F1,G1 for white
+    val squares = Array(rank * 8 + 5, rank * 8 + 6)
+    logger.debug(s"Checking squares: ${squares.map(Board.toAlgebraic).mkString(", ")}") // Add this line
+
     val squaresEmpty = !squares.exists(sq => getBit(occupied, sq))
     logger.debug(s"Intermediate squares empty: $squaresEmpty")
 
     if (!squaresEmpty) return false
 
-    // We want to check if the squares are attacked by the opposite side
-    // Fix: was passing side.opposite before, which checks attacks in wrong direction
-    val squaresNotAttacked = squares.forall(sq => !isSquareAttacked(sq, side.opposite))
+    val squaresNotAttacked = squares.forall(sq => !isSquareAttacked(sq, side))
     logger.debug(s"Squares not under attack: $squaresNotAttacked")
 
     squaresNotAttacked
