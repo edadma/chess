@@ -379,6 +379,7 @@ case class Board(
       }
       toSquare <- (0 until 64).iterator
       if getBit(possibleMoves, toSquare)
+      if !makeMove(Move(fromSquare, toSquare, piece)).isCheck(side)
       move <- {
         val isPromotion = (piece == WhitePawn && toSquare / 8 == 7) ||
           (piece == BlackPawn && toSquare / 8 == 0)
