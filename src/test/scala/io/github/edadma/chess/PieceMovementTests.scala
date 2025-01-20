@@ -345,9 +345,9 @@ class PieceMovementTests extends ChessSpec {
         moves should contain(Move(E1, G1, WhiteKing, None, None, false, true))
       }
 
-      "not allow castling through threatened square (pawn)" in withDebugLogging(
+      "not allow castling through threatened square (pawn)" in /*withDebugLogging(
         "not allow castling through threatened square (pawn)",
-      ) {
+      )*/ {
         val board = Board.fromString("""
                                        |.  .  .  .  .  .  .  .
                                        |.  .  .  .  .  .  .  .
@@ -398,7 +398,7 @@ class PieceMovementTests extends ChessSpec {
         )
       }
 
-      "not allow castling through check" in {
+      "not allow castling through check" in withDebugLogging("not allow castling through check") {
         val board = Board.fromString(
           """
             |.  .  .  .  k  .  .  r
