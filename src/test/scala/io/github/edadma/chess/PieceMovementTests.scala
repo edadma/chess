@@ -398,7 +398,7 @@ class PieceMovementTests extends ChessSpec {
         )
       }
 
-      "not allow castling through check" in withDebugLogging("not allow castling through check") {
+      "not allow castling through check" in /*withDebugLogging("not allow castling through check")*/ {
         val board = Board.fromString(
           """
             |.  .  .  .  k  .  .  r
