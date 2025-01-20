@@ -49,27 +49,26 @@ class PieceMovementTests extends ChessSpec {
           (E4, Some(BlackPawn)), // Diagonal capture
         )
         captures should not contain (F3, Some(BlackKnight)) // Diagonal capture
-
       }
 
-//      "be blocked by friendly pieces" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  P  .  .  .  .
-//                                       |.  .  .  Q  N  .  .  .
-//                                       |.  .  .  B  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
-//
-//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
-//
-//        // Should not be able to move through or capture friendly pieces
-//        moves should not contain allOf(D6, D4, E4)
-//        // Should be able to move in unblocked directions
-//        moves should contain allOf (C5, C4, E5)
-//      }
+      "be blocked by friendly pieces" in {
+        val board = Board.fromString("""
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  P  .  .  .  .
+                                       |.  .  .  Q  N  .  .  .
+                                       |.  .  .  B  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+
+        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+
+        // Should not be able to move through or capture friendly pieces
+        moves should not contain allOf(D6, D4, E4)
+        // Should be able to move in unblocked directions
+        moves should contain allOf (C5, C4, C6, E4, E6)
+      }
     }
 
     "complex scenarios" - {
