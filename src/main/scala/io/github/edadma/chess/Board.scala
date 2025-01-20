@@ -716,6 +716,6 @@ case class Board(
     if (squares.exists(sq => getBit(occupied, sq))) return false
 
     // Verify squares king moves through aren't attacked
-    squares.take(2).forall(sq => !isSquareAttacked(sq, side.opposite))
+    squares.take(2).forall(sq => !isSquareAttacked(sq, side))
   }
 }
