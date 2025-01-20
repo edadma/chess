@@ -72,20 +72,22 @@ class PieceMovementTests extends ChessSpec {
     }
 
     "complex scenarios" - {
-//      "respect pin to king" in {
-//        val board = Board.fromString("""
-//                                       |.  .  .  r  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  Q  .  .  .  .
-//                                       |.  .  .  K  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .
-//                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
-//
-//        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
-//
-//        // Queen is pinned vertically - can only move up/down
-//        moves should contain only (D7, D8)
-//      }
+      "respect pin to king" in {
+        val board = Board.fromString("""
+                                       |.  .  .  r  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  Q  .  .  .  .
+                                       |.  .  .  K  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .
+                                       |.  .  .  .  .  .  .  .""".stripMargin.trim)
+
+        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).map(_.to).toSet
+
+        // Queen is pinned vertically - can only move up/down
+        moves should contain only (D7, D8)
+      }
 
 //      "prevent moves that would leave king in check" in {
 //        val board = Board.fromString("""
