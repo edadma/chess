@@ -42,16 +42,17 @@ def parseBoardString(board: String): Set[(Int, Int, Piece)] = {
 trait ChessBoard {
   def getPiece(square: Int): Option[Piece]
   def applyMove(move: Move): ChessBoard
+  def lastMove: Option[Move]
 }
 
-case class Board(pieces: Map[String, Piece]) extends ChessBoard:
+case class Board(pieces: Map[String, Piece], lastMove: Option[Move]) extends ChessBoard:
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
   def applyMove(move: Move): ChessBoard =
     val from  = toAlgebraic(move.fromIndex)
     val piece = pieces(from)
     val to    = toAlgebraic(move.toIndex)
 
-    Board(pieces + (to -> piece) - from)
+    Board(pieces + (to -> piece) - from, Some(move))
 
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
