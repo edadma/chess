@@ -27,55 +27,34 @@ def toAlgebraic(square: Int): String = {
   file.toString + rank
 }
 
-  def fromString(layout: String, whiteToMove: Boolean = true): Board = {
-    val rows = layout.trim.split('\n')
-    require(rows.length == 8, "Board must have 8 rows")
-
-    var whitePawns, whiteKnights, whiteBishops, whiteRooks, whiteQueens, whiteKing = 0L
-    var blackPawns, blackKnights, blackBishops, blackRooks, blackQueens, blackKing = 0L
-
+def parseBoardString(board: String): Set[(Int, Int, Piece)] = {
+  val lines = board.split("\n").map(_.trim).filter(_.nonEmpty)
+  val pieces =
     for {
-      (row, rankIndex)       <- rows.zipWithIndex
-      (pieceChar, fileIndex) <- row.trim.grouped(3).zipWithIndex if pieceChar.trim.nonEmpty
-      square = (7 - rankIndex) * 8 + fileIndex
-    } {
-      val bit = 1L << square
-      pieceChar(0) match {
-        case 'P' => whitePawns |= bit
-        case 'N' => whiteKnights |= bit
-        case 'B' => whiteBishops |= bit
-        case 'R' => whiteRooks |= bit
-        case 'Q' => whiteQueens |= bit
-        case 'K' => whiteKing |= bit
-        case 'p' =>
-          logger.debug(s"Found black pawn in source at rank=$rankIndex file=$fileIndex")
-          logger.debug(s"Calculated square = ${(7 - rankIndex)} * 8 + $fileIndex = $square (${toAlgebraic(square)})")
-          blackPawns |= bit
-        case 'n' => blackKnights |= bit
-        case 'b' => blackBishops |= bit
-        case 'r' => blackRooks |= bit
-        case 'q' => blackQueens |= bit
-        case 'k' => blackKing |= bit
-        case '.' => // Empty square
-        case c   => throw new IllegalArgumentException(s"Invalid piece character: $c")
-      }
-    }
-
-    Board(
-      whitePawns = whitePawns,
-      whiteKnights = whiteKnights,
-      whiteBishops = whiteBishops,
-      whiteRooks = whiteRooks,
-      whiteQueens = whiteQueens,
-      whiteKing = whiteKing,
-      blackPawns = blackPawns,
-      blackKnights = blackKnights,
-      blackBishops = blackBishops,
-      blackRooks = blackRooks,
-      blackQueens = blackQueens,
-      blackKing = blackKing,
+      (line, y) <- lines.zipWithIndex.toList
+      chars = line.replaceAll("\\s+", "")
+      (piece, x) <- chars.zipWithIndex
+      if piece != '.'
+    } yield (
+      x,
+      7 - y,
+      piece match {
+        case 'P' => WhitePawn
+        case 'N' => WhiteKnight
+        case 'B' => WhiteBishop
+        case 'R' => WhiteRook
+        case 'Q' => WhiteQueen
+        case 'K' => WhiteKing
+        case 'p' => BlackPawn
+        case 'n' => BlackKnight
+        case 'b' => BlackBishop
+        case 'r' => BlackRook
+        case 'q' => BlackQueen
+        case 'k' => BlackKing
+      },
     )
-  }
+
+  pieces.toSet
 }
 
 enum PieceType {
