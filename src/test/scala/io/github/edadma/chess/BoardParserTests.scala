@@ -2,7 +2,7 @@ package io.github.edadma.chess
 
 import org.scalatest.funsuite.AnyFunSuite
 
-class BoardParserTest extends AnyFunSuite {
+class BoardParserTests extends AnyFunSuite {
   test("parseBoardString should correctly parse a board layout") {
     val input = """
      r  n  b  q  k  b  n  r  

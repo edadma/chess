@@ -3,7 +3,6 @@
 # core
 ./src/main/scala/io/github/edadma/chess
 Board.scala
-Game.scala
 package.scala
 
 # game REPL
@@ -12,10 +11,8 @@ nodejs.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
-BoardStateTests.scala
+BoardParserTests.scala
 ChessSpec.scala
-GameTests.scala
-PieceMovementTests.scala
 
 # build files
 ./
