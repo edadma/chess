@@ -7,6 +7,36 @@ import pprint.pprintln
 class PieceMovementTests extends ChessSpec {
   "Queen" - {
     "basic moves" - {
+      "basic queen capture along file" in withDebugLogging("queen capture test") {
+        val board = Board.fromString(
+          """
+            |.  .  .  r  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  Q  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .
+            |.  .  .  .  .  .  .  .""".stripMargin.trim,
+        )
+
+        val moves = board.generateMoves(White).filter(_.piece == WhiteQueen).toSet
+
+        // Test specific capture move
+        moves.find(_.to == D8) match {
+          case Some(move) =>
+            move.capture shouldBe Some(BlackRook)
+          case None =>
+            fail("Queen should be able to capture rook on d8")
+        }
+
+        // Also verify other vertical moves
+        moves.map(_.to) should contain allOf (
+          D7, // Square above queen
+          D8, // Rook's square
+        )
+      }
+
       "move in all directions on empty board" in {
         val board = Board.fromString("""
                                        |.  .  .  .  .  .  .  .
