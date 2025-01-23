@@ -43,6 +43,12 @@ trait ChessBoard {
   def getPiece(square: Int): Option[Piece]
   def applyMove(move: Move): ChessBoard
   def lastMove: Option[Move]
+  def isLegalMove(move: Move): Boolean
+  def getLegalMoves: Iterator[Move]
+  def isInCheck(side: Side): Boolean
+  def isCheckmate(side: Side): Boolean
+  def isStalemate(side: Side): Boolean
+  def isSquareAttacked(square: Int, by: Side): Boolean
 }
 
 case class Board(pieces: Map[String, Piece], lastMove: Option[Move]) extends ChessBoard:
