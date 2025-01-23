@@ -9,24 +9,6 @@ val A6 = "A6"; val B6 = "B6"; val C6 = "C6"; val D6 = "D6"; val E6 = "E6"; val F
 val A7 = "A7"; val B7 = "B7"; val C7 = "C7"; val D7 = "D7"; val E7 = "E7"; val F7 = "F7"; val G7 = "G7"; val H7 = "H7"
 val A8 = "A8"; val B8 = "B8"; val C8 = "C8"; val D8 = "D8"; val E8 = "E8"; val F8 = "F8"; val G8 = "G8"; val H8 = "H8"
 
-def fromAlgebraic(s: String): Option[Int] = {
-  if (s.length != 2) return None
-
-  val file = s(0).toLower - 'a'
-  val rank = s(1).asDigit - 1
-
-  if (file < 0 || file > 7 || rank < 0 || rank > 7) None
-  else Some(rank * 8 + file)
-}
-
-// Convert board index (0-63) to algebraic notation
-def toAlgebraic(square: Int): String = {
-  require(square >= 0 && square < 64, "Square index must be between 0 and 63")
-  val file = ('a' + square % 8).toChar
-  val rank = (square / 8 + 1).toString
-  file.toString + rank
-}
-
 def parseBoardString(board: String): Set[(Int, Int, Piece)] = {
   val lines = board.split("\n").map(_.trim).filter(_.nonEmpty)
   val pieces =
@@ -57,6 +39,20 @@ def parseBoardString(board: String): Set[(Int, Int, Piece)] = {
   pieces.toSet
 }
 
+trait ChessBoard {
+  def getPiece(square: Int): Option[Piece]
+  def applyMove(move: Move): ChessBoard
+}
+
+case class Board(pieces: Map[String, Piece]) extends ChessBoard:
+  def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
+  def applyMove(move: Move): ChessBoard =
+    val from  = toAlgebraic(move.fromIndex)
+    val piece = pieces(from)
+    val to    = toAlgebraic(move.toIndex)
+
+    Board(pieces + (to -> piece) - from)
+
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
 }
@@ -67,26 +63,29 @@ enum MoveType {
 
 trait ChessMove {
   def fromIndex: Int
-
   def toIndex: Int
-
   def piece: Piece
-
   def moveType: MoveType
-
-  def promotionPiece: Option[Piece]
+  def promotion: Option[Piece]
 }
 
-// Case class for moves
 case class Move(
-    from: Int,
-    to: Int,
+    from: String,
+    to: String,
     piece: Piece,
-    capture: Option[Piece] = None,
+    moveType: MoveType,
     promotion: Option[Piece] = None,
-    isEnPassant: Boolean = false,
-    isCastling: Boolean = false,
-)
+) extends ChessMove:
+  def fromIndex: Int = fromAlgebraic(from)
+  def toIndex: Int   = fromAlgebraic(to)
+
+case class BitMove(
+    fromIndex: Int,
+    toIndex: Int,
+    piece: Piece,
+    moveType: MoveType,
+    promotion: Option[Piece] = None,
+) extends ChessMove
 
 sealed trait Side {
   def opposite: Side
