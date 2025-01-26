@@ -154,8 +154,6 @@ trait ChessBoard {
 
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
-  def isLegalMove(move: Move): Boolean
-  def getLegalMoves: Iterator[Move]
   def isCheckmate(side: Side): Boolean
   def isStalemate(side: Side): Boolean
 }
