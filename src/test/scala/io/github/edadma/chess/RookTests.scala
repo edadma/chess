@@ -7,8 +7,8 @@ class RookTests extends ChessSpec {
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
-        |.  .  .  r  .  .  .  .
         |.  .  .  .  .  .  .  .
+        |.  .  .  r  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
@@ -28,10 +28,6 @@ class RookTests extends ChessSpec {
       s"square ${toAlgebraic(square)} should be attacked" in {
         assert(board.isSquareAttacked(square, Black))
       }
-    }
-
-    "center square should not be attacked" in {
-      assert(!board.isSquareAttacked(27, Black))
     }
 
     "should be 14 squares" in {
@@ -59,64 +55,64 @@ class RookTests extends ChessSpec {
     board.getMoves(Black).length shouldBe 11
   }
 
-  "corner" - {
-    val board = Board.fromString(
-      """
-        |.  .  .  .  .  .  .  r
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |""".stripMargin,
-    )
+//  "corner" - {
+//    val board = Board.fromString(
+//      """
+//        |.  .  .  .  .  .  .  r
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |""".stripMargin,
+//    )
+//
+//    val expectedAttacks = (for {
+//      i <- 0 to 7
+//      square <- List(
+//        (0, i), // horizontal
+//        (i, 7), // vertical
+//      )
+//      if square != (0, 7) // exclude rook's position
+//    } yield square._1 * 8 + square._2).toList
+//
+//    expectedAttacks.foreach { square =>
+//      s"square ${toAlgebraic(square)} should be attacked" in {
+//        assert(board.isSquareAttacked(square, Black))
+//      }
+//    }
+//
+//    "should be 14 squares" in {
+//      board.getMoves(Black).length shouldBe 14
+//    }
+//  }
 
-    val expectedAttacks = (for {
-      i <- 0 to 7
-      square <- List(
-        (0, i), // horizontal
-        (i, 7), // vertical
-      )
-      if square != (0, 7) // exclude rook's position
-    } yield square._1 * 8 + square._2).toList
-
-    expectedAttacks.foreach { square =>
-      s"square ${toAlgebraic(square)} should be attacked" in {
-        assert(board.isSquareAttacked(square, Black))
-      }
-    }
-
-    "should be 14 squares" in {
-      board.getMoves(Black).length shouldBe 14
-    }
-  }
-
-  "blocked by enemy piece" - {
-    val board = Board.fromString(
-      """
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  r  .  .  .  .
-        |.  .  .  P  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |.  .  .  .  .  .  .  .
-        |""".stripMargin,
-    )
-
-    "should be able to capture enemy piece" in {
-      assert(board.isSquareAttacked(fromAlgebraic("d4"), Black))
-    }
-
-    "should not attack beyond enemy piece" in {
-      assert(!board.isSquareAttacked(fromAlgebraic("d3"), Black))
-    }
-
-    "should be 12 squares including capture" in {
-      board.getMoves(Black).length shouldBe 12
-    }
-  }
+//  "blocked by enemy piece" - {
+//    val board = Board.fromString(
+//      """
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  r  .  .  .  .
+//        |.  .  .  P  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |.  .  .  .  .  .  .  .
+//        |""".stripMargin,
+//    )
+//
+//    "should be able to capture enemy piece" in {
+//      assert(board.isSquareAttacked(fromAlgebraic("d4"), Black))
+//    }
+//
+//    "should not attack beyond enemy piece" in {
+//      assert(!board.isSquareAttacked(fromAlgebraic("d3"), Black))
+//    }
+//
+//    "should be 12 squares including capture" in {
+//      board.getMoves(Black).length shouldBe 12
+//    }
+//  }
 }

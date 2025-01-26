@@ -190,10 +190,11 @@ trait ChessBoard {
   }
 
   def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
-    (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory))
+    (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory) ++ getRookMoves(side, moveFactory))
       .filterNot(move => applyMove(move).isInCheck(side))
 
-  def isSquareAttacked(square: Int, by: Side): Boolean = isAttackedByKnight(square, by) || isAttackedByKing(square, by)
+  def isSquareAttacked(square: Int, by: Side): Boolean =
+    isAttackedByKnight(square, by) || isAttackedByKing(square, by) || isAttackedByRook(square, by)
 
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
