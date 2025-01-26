@@ -56,6 +56,8 @@ class KnightTests extends ChessSpec {
     )
 
     assert(!board.isSquareAttacked(fromAlgebraic("e4"), Black)) // Square with black pawn
+
+    board.getMoves(Black).length shouldBe 7
   }
 
   "corner" - {
@@ -81,6 +83,10 @@ class KnightTests extends ChessSpec {
       s"square ${toAlgebraic(square)} should be attacked" in {
         assert(board.isSquareAttacked(square, Black))
       }
+    }
+
+    "should be 2 squares" in {
+      board.getMoves(Black).length shouldBe 2
     }
   }
 
@@ -109,6 +115,10 @@ class KnightTests extends ChessSpec {
       s"square ${toAlgebraic(square)} should be attacked" in {
         assert(board.isSquareAttacked(square, Black))
       }
+    }
+
+    "should be 4 squares" in {
+      board.getMoves(Black).length shouldBe 4
     }
   }
 }
