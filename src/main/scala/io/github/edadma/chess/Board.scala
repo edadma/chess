@@ -64,6 +64,13 @@ object ChessBoard {
     (1, 0),
     (1, 1),
   )
+
+  private val rookDirections = List(
+    (-1, 0), // up
+    (1, 0),  // down
+    (0, -1), // left
+    (0, 1),  // right
+  )
 }
 
 trait ChessBoard {
@@ -86,7 +93,7 @@ trait ChessBoard {
     val fromRank = fromSquare / 8
     val fromFile = fromSquare % 8
 
-    knightOffsets.iterator.map { case (rankOffset, fileOffset) =>
+    ChessBoard.knightOffsets.iterator.map { case (rankOffset, fileOffset) =>
       val toRank = fromRank + rankOffset
       val toFile = fromFile + fileOffset
       (toRank, toFile)
@@ -144,6 +151,42 @@ trait ChessBoard {
     else getKingMoveSquares(targetSquare).exists(square =>
       getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.KING),
     )
+  }
+
+  protected def getRookMoveSquares(fromSquare: Int, includeCapturable: Boolean = true): Iterator[Int] = {
+    val fromRank = fromSquare / 8
+    val fromFile = fromSquare % 8
+
+    ChessBoard.rookDirections.iterator.flatMap { case (rankDelta, fileDelta) =>
+      (1 to 7).iterator
+        .map { i =>
+          val toRank = fromRank + (rankDelta * i)
+          val toFile = fromFile + (fileDelta * i)
+          (toRank, toFile)
+        }
+        .takeWhile { case (rank, file) =>
+          rank >= 0 && rank < 8 && file >= 0 && file < 8 &&
+          (includeCapturable || getPiece(rank * 8 + file).isEmpty)
+        }
+        .map { case (rank, file) => rank * 8 + file }
+    }
+  }
+
+  protected def getRookMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    getPiecesByType(PieceType.ROOK, side).flatMap { fromSquare =>
+      getRookMoveSquares(fromSquare)
+        .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
+        .map(toSquare =>
+          factory.create(fromSquare, toSquare, getPiece(fromSquare).get, MoveType.NORMAL, None),
+        )
+    }
+  }
+
+  protected def isAttackedByRook(targetSquare: Int, attackingSide: Side): Boolean = {
+    if (getPiece(targetSquare).exists(_.side == attackingSide)) false
+    else getRookMoveSquares(targetSquare, includeCapturable = true).exists { square =>
+      getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.ROOK)
+    }
   }
 
   def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
