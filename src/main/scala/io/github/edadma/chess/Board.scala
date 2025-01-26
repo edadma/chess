@@ -56,26 +56,26 @@ object ChessBoard {
 }
 
 trait ChessBoard {
+  protected def getKnightMoveSquares(fromSquare: Int): Iterator[Int] = {
+    val fromRank = fromSquare / 8
+    val fromFile = fromSquare % 8
+
+    knightOffsets.iterator.map { case (rankOffset, fileOffset) =>
+      val toRank = fromRank + rankOffset
+      val toFile = fromFile + fileOffset
+      (toRank, toFile)
+    }.filter { case (rank, file) =>
+      rank >= 0 && rank < 8 && file >= 0 && file < 8
+    }.map { case (rank, file) =>
+      rank * 8 + file
+    }
+  }
+
   def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
-    val targetRank = targetSquare / 8
-    val targetFile = targetSquare % 8
-
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
-    else
-      knightOffsets.exists { case (rankOffset, fileOffset) =>
-        val attackingRank = targetRank + rankOffset
-        val attackingFile = targetFile + fileOffset
-
-        if (
-          attackingRank >= 0 && attackingRank < 8 &&
-          attackingFile >= 0 && attackingFile < 8
-        ) {
-          val attackingSquare = attackingRank * 8 + attackingFile
-          getPiece(attackingSquare).exists(p =>
-            p.side == attackingSide && p.pieceType == PieceType.KNIGHT,
-          )
-        } else false
-      }
+    else getKnightMoveSquares(targetSquare).exists(square =>
+      getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.KNIGHT),
+    )
   }
 
   def getPiece(square: Int): Option[Piece]
