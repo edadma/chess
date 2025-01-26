@@ -85,6 +85,16 @@ trait ChessBoard {
     }
   }
 
+  def getKnightMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    getPiecesByType(PieceType.KNIGHT, side).flatMap { fromSquare =>
+      getKnightMoveSquares(fromSquare)
+        .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
+        .map(toSquare =>
+          factory.create(fromSquare, toSquare, getPiece(fromSquare).get, MoveType.NORMAL, None),
+        )
+    }
+  }
+
   def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
     else getKnightMoveSquares(targetSquare).exists(square =>
@@ -141,8 +151,6 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
   def isLegalMove(move: Move): Boolean = ???
 
   def getLegalMoves: Iterator[Move] = ???
-
-  def isInCheck(side: Side): Boolean = ???
 
   def isCheckmate(side: Side): Boolean = ???
 
