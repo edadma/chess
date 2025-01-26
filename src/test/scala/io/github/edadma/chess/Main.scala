@@ -9,13 +9,12 @@ import pprint.pprintln
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
-      |.  .  .  .  .  .  .  .
       |.  .  .  r  .  .  .  .
+      |.  .  .  p  .  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |""".stripMargin,
   )
 
-//  println(board.ray(fromAlgebraic("d4"), -1, 0).toList.map(toAlgebraic))
-  println(board.isSquareAttacked(fromAlgebraic("e3"), Black))
+  println(board.getMoves(Black).toList)
