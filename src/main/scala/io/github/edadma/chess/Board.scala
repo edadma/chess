@@ -154,10 +154,6 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
 
     Board(pieces + (to -> piece) - from, Some(move.asInstanceOf[Move]))
 
-  def isLegalMove(move: Move): Boolean = ???
-
-  def getLegalMoves: Iterator[Move] = ???
-
   def isCheckmate(side: Side): Boolean = ???
 
   def isStalemate(side: Side): Boolean = ???
