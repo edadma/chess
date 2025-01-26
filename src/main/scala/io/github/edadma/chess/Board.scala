@@ -56,6 +56,20 @@ object ChessBoard {
 }
 
 trait ChessBoard {
+  def getPieces: Iterator[(Int, Piece)]
+  def getPiece(square: Int): Option[Piece]
+
+  def getPiecesBySide(side: Side): Iterator[(Int, Piece)] = {
+    getPieces.filter(_._2.side == side)
+  }
+
+  def getPiecesByType(pieceType: PieceType, side: Side): Iterator[Int] = {
+    getPiecesBySide(side).filter(_._2.pieceType == pieceType).map(_._1)
+  }
+
+  def isInCheck(side: Side): Boolean =
+    getPiecesByType(PieceType.KING, side).exists(square => isSquareAttacked(square, side.opposite))
+
   protected def getKnightMoveSquares(fromSquare: Int): Iterator[Int] = {
     val fromRank = fromSquare / 8
     val fromFile = fromSquare % 8
@@ -78,12 +92,10 @@ trait ChessBoard {
     )
   }
 
-  def getPiece(square: Int): Option[Piece]
   def applyMove(move: Move): ChessBoard
   def lastMove: Option[Move]
   def isLegalMove(move: Move): Boolean
   def getLegalMoves: Iterator[Move]
-  def isInCheck(side: Side): Boolean
   def isCheckmate(side: Side): Boolean
   def isStalemate(side: Side): Boolean
 
@@ -111,7 +123,14 @@ object Board {
 }
 
 case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) extends ChessBoard:
+  override def getPieces: Iterator[(Int, Piece)] = {
+    pieces.iterator.map { case (square, piece) =>
+      (fromAlgebraic(square), piece)
+    }
+  }
+
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
+
   def applyMove(move: Move): ChessBoard =
     val from  = toAlgebraic(move.fromIndex)
     val piece = pieces(from)
@@ -135,6 +154,15 @@ enum PieceType {
 
 enum MoveType {
   case NORMAL, EN_PASSANT, CASTLE_KINGSIDE, CASTLE_QUEENSIDE
+}
+
+trait ChessMoveFactory {
+  def create(fromIndex: Int, toIndex: Int, piece: Piece, moveType: MoveType, promotion: Option[Piece]): ChessMove
+}
+
+object MoveFactory extends ChessMoveFactory {
+  def create(fromIndex: Int, toIndex: Int, piece: Piece, moveType: MoveType, promotion: Option[Piece]): Move =
+    Move(toAlgebraic(fromIndex), toAlgebraic(toIndex), piece, moveType, promotion)
 }
 
 trait ChessMove {
