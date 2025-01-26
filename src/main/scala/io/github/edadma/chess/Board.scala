@@ -191,7 +191,7 @@ trait ChessBoard {
   }
 
   protected def getRookMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(Set(PieceType.ROOK), side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.ROOK, PieceType.QUEEN), side).flatMap { fromSquare =>
       getRookMoveSquares(fromSquare)
         .filter(toSquare =>
           getPiece(toSquare).forall(_.side != side),
@@ -206,12 +206,12 @@ trait ChessBoard {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
     else getRookMoveSquares(targetSquare).exists { square =>
       val piece = getPiece(square)
-      piece.exists(p => p.side == attackingSide && p.pieceType == PieceType.ROOK)
+      piece.exists(p => p.side == attackingSide && (p.pieceType == PieceType.ROOK || p.pieceType == PieceType.QUEEN))
     }
   }
 
   protected def getBishopMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(Set(PieceType.BISHOP), side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.BISHOP, PieceType.QUEEN), side).flatMap { fromSquare =>
       getBishopMoveSquares(fromSquare)
         .filter(toSquare =>
           getPiece(toSquare).forall(_.side != side),
@@ -226,7 +226,7 @@ trait ChessBoard {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
     else getBishopMoveSquares(targetSquare).exists { square =>
       val piece = getPiece(square)
-      piece.exists(p => p.side == attackingSide && p.pieceType == PieceType.BISHOP)
+      piece.exists(p => p.side == attackingSide && (p.pieceType == PieceType.BISHOP || p.pieceType == PieceType.QUEEN))
     }
   }
 
