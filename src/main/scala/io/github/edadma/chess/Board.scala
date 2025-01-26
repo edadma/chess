@@ -85,7 +85,7 @@ trait ChessBoard {
     }
   }
 
-  def getKnightMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+  protected def getKnightMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
     getPiecesByType(PieceType.KNIGHT, side).flatMap { fromSquare =>
       getKnightMoveSquares(fromSquare)
         .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
@@ -95,6 +95,9 @@ trait ChessBoard {
     }
   }
 
+  def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
+    getKnightMoves(side, moveFactory).filterNot(move => applyMove(move).isInCheck(side))
+
   def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
     else getKnightMoveSquares(targetSquare).exists(square =>
@@ -102,7 +105,7 @@ trait ChessBoard {
     )
   }
 
-  def applyMove(move: Move): ChessBoard
+  def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
   def isLegalMove(move: Move): Boolean
   def getLegalMoves: Iterator[Move]
@@ -141,7 +144,7 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
 
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
 
-  def applyMove(move: Move): ChessBoard =
+  def applyMove(move: Move): Board =
     val from  = toAlgebraic(move.fromIndex)
     val piece = pieces(from)
     val to    = toAlgebraic(move.toIndex)
