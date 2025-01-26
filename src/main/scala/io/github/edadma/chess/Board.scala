@@ -91,12 +91,12 @@ trait ChessBoard {
     getPieces.filter(_._2.side == side)
   }
 
-  def getPiecesByType(pieceType: PieceType, side: Side): Iterator[Int] = {
-    getPiecesBySide(side).filter(_._2.pieceType == pieceType).map(_._1)
+  def getPiecesByType(pieceTypes: Set[PieceType], side: Side): Iterator[Int] = {
+    getPiecesBySide(side).filter((_, p) => pieceTypes(p.pieceType)).map(_._1)
   }
 
   def isInCheck(side: Side): Boolean =
-    getPiecesByType(PieceType.KING, side).exists(square => isSquareAttacked(square, side.opposite))
+    getPiecesByType(Set(PieceType.KING), side).exists(square => isSquareAttacked(square, side.opposite))
 
   protected def getKnightMoveSquares(fromSquare: Int): Iterator[Int] = {
     val fromRank = fromSquare / 8
@@ -114,7 +114,7 @@ trait ChessBoard {
   }
 
   protected def getKnightMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(PieceType.KNIGHT, side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.KNIGHT), side).flatMap { fromSquare =>
       getKnightMoveSquares(fromSquare)
         .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
         .map(toSquare =>
@@ -146,7 +146,7 @@ trait ChessBoard {
   }
 
   protected def getKingMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(PieceType.KING, side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.KING), side).flatMap { fromSquare =>
       getKingMoveSquares(fromSquare)
         .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
         .map(toSquare =>
@@ -191,7 +191,7 @@ trait ChessBoard {
   }
 
   protected def getRookMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(PieceType.ROOK, side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.ROOK), side).flatMap { fromSquare =>
       getRookMoveSquares(fromSquare)
         .filter(toSquare =>
           getPiece(toSquare).forall(_.side != side),
@@ -211,7 +211,7 @@ trait ChessBoard {
   }
 
   protected def getBishopMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
-    getPiecesByType(PieceType.BISHOP, side).flatMap { fromSquare =>
+    getPiecesByType(Set(PieceType.BISHOP), side).flatMap { fromSquare =>
       getBishopMoveSquares(fromSquare)
         .filter(toSquare =>
           getPiece(toSquare).forall(_.side != side),
