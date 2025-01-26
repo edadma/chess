@@ -58,6 +58,7 @@ object ChessBoard {
 trait ChessBoard {
   def getPieces: Iterator[(Int, Piece)]
   def getPiece(square: Int): Option[Piece]
+  def getMoves(side: Side): Iterator[ChessMove]
 
   def getPiecesBySide(side: Side): Iterator[(Int, Piece)] = {
     getPieces.filter(_._2.side == side)
@@ -144,12 +145,14 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
 
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
 
-  def applyMove(move: Move): Board =
+  def getMoves(side: Side): Iterator[ChessMove] = getMoves(side, MoveFactory)
+
+  def applyMove(move: ChessMove): ChessBoard =
     val from  = toAlgebraic(move.fromIndex)
     val piece = pieces(from)
     val to    = toAlgebraic(move.toIndex)
 
-    Board(pieces + (to -> piece) - from, Some(move))
+    Board(pieces + (to -> piece) - from, Some(move.asInstanceOf[Move]))
 
   def isLegalMove(move: Move): Boolean = ???
 

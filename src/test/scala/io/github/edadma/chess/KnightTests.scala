@@ -35,6 +35,10 @@ class KnightTests extends ChessSpec {
     "center square should not be attacked" in {
       assert(!board.isSquareAttacked(27, Black))
     }
+
+    "should be 8 squares" in {
+      board.getMoves(Black).length shouldBe 8
+    }
   }
 
   "blocked by friendly piece" in {
