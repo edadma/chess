@@ -53,6 +53,17 @@ object ChessBoard {
     (2, -1),
     (2, 1),
   )
+
+  private val kingOffsets = List(
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+  )
 }
 
 trait ChessBoard {
@@ -96,15 +107,50 @@ trait ChessBoard {
     }
   }
 
-  def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
-    getKnightMoves(side, moveFactory).filterNot(move => applyMove(move).isInCheck(side))
-
-  def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
+  protected def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
     else getKnightMoveSquares(targetSquare).exists(square =>
       getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.KNIGHT),
     )
   }
+
+  protected def getKingMoveSquares(fromSquare: Int): Iterator[Int] = {
+    val fromRank = fromSquare / 8
+    val fromFile = fromSquare % 8
+
+    ChessBoard.kingOffsets.iterator.map { case (rankOffset, fileOffset) =>
+      val toRank = fromRank + rankOffset
+      val toFile = fromFile + fileOffset
+      (toRank, toFile)
+    }.filter { case (rank, file) =>
+      rank >= 0 && rank < 8 && file >= 0 && file < 8
+    }.map { case (rank, file) =>
+      rank * 8 + file
+    }
+  }
+
+  protected def getKingMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    getPiecesByType(PieceType.KING, side).flatMap { fromSquare =>
+      getKingMoveSquares(fromSquare)
+        .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
+        .map(toSquare =>
+          factory.create(fromSquare, toSquare, getPiece(fromSquare).get, MoveType.NORMAL, None),
+        )
+    }
+  }
+
+  protected def isAttackedByKing(targetSquare: Int, attackingSide: Side): Boolean = {
+    if (getPiece(targetSquare).exists(_.side == attackingSide)) false
+    else getKingMoveSquares(targetSquare).exists(square =>
+      getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.KING),
+    )
+  }
+
+  def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
+    (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory))
+      .filterNot(move => applyMove(move).isInCheck(side))
+
+  def isSquareAttacked(square: Int, by: Side): Boolean = isAttackedByKnight(square, by) || isAttackedByKing(square, by)
 
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
@@ -112,9 +158,6 @@ trait ChessBoard {
   def getLegalMoves: Iterator[Move]
   def isCheckmate(side: Side): Boolean
   def isStalemate(side: Side): Boolean
-
-  def isSquareAttacked(square: Int, by: Side): Boolean =
-    isAttackedByKnight(square, by)
 }
 
 object Board {
