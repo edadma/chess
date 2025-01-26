@@ -72,6 +72,13 @@ object ChessBoard {
     (0, -1), // left
     (0, 1),  // right
   )
+
+  private val bishopDirections = List(
+    (-1, -1), // up-left
+    (-1, 1),  // up-right
+    (1, -1),  // down-left
+    (1, 1),   // down-right
+  )
 }
 
 trait ChessBoard {
@@ -203,12 +210,40 @@ trait ChessBoard {
     }
   }
 
+  protected def getBishopMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    getPiecesByType(PieceType.BISHOP, side).flatMap { fromSquare =>
+      getBishopMoveSquares(fromSquare)
+        .filter(toSquare =>
+          getPiece(toSquare).forall(_.side != side),
+        )
+        .map(toSquare =>
+          factory.create(fromSquare, toSquare, getPiece(fromSquare).get, MoveType.NORMAL, None),
+        )
+    }
+  }
+
+  protected def isAttackedByBishop(targetSquare: Int, attackingSide: Side): Boolean = {
+    if (getPiece(targetSquare).exists(_.side == attackingSide)) false
+    else getBishopMoveSquares(targetSquare).exists { square =>
+      val piece = getPiece(square)
+      piece.exists(p => p.side == attackingSide && p.pieceType == PieceType.BISHOP)
+    }
+  }
+
+  protected[chess] def getBishopMoveSquares(fromSquare: Int): Iterator[Int] = {
+    ChessBoard.bishopDirections.iterator.flatMap { case (rankDelta, fileDelta) =>
+      ray(fromSquare, fileDelta, rankDelta)
+    }
+  }
+
   def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
-    (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory) ++ getRookMoves(side, moveFactory))
+    (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory) ++ getRookMoves(side, moveFactory)
+      ++ getBishopMoves(side, moveFactory))
       .filterNot(move => applyMove(move).isInCheck(side))
 
   def isSquareAttacked(square: Int, by: Side): Boolean =
     isAttackedByKnight(square, by) || isAttackedByKing(square, by) || isAttackedByRook(square, by)
+      || isAttackedByBishop(square, by)
 
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
