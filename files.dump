@@ -11,9 +11,14 @@ nodejs.scala
 
 # unit testing
 ./src/test/scala/io/github/edadma/chess
+BishopTests.scala
 BoardParserTests.scala
 ChessSpec.scala
+KingTests.scala
 KnightTests.scala
+PinTests.scala
+QueenTests.scala
+RookTests.scala
 
 # build files
 ./
