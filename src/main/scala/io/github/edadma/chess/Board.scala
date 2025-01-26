@@ -1,5 +1,7 @@
 package io.github.edadma.chess
 
+import io.github.edadma.chess.ChessBoard.knightOffsets
+
 import scala.language.postfixOps
 
 val A1 = "A1"; val B1 = "B1"; val C1 = "C1"; val D1 = "D1"; val E1 = "E1"; val F1 = "F1"; val G1 = "G1"; val H1 = "H1"
@@ -40,7 +42,41 @@ def parseBoardString(board: String): Set[(Int, Piece)] = {
   pieces.toSet
 }
 
+object ChessBoard {
+  private val knightOffsets = List(
+    (-2, -1),
+    (-2, 1),
+    (-1, -2),
+    (-1, 2),
+    (1, -2),
+    (1, 2),
+    (2, -1),
+    (2, 1),
+  )
+}
+
 trait ChessBoard {
+
+  def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
+    val targetRank = targetSquare / 8
+    val targetFile = targetSquare % 8
+
+    knightOffsets.exists { case (rankOffset, fileOffset) =>
+      val attackingRank = targetRank + rankOffset
+      val attackingFile = targetFile + fileOffset
+
+      if (
+        attackingRank >= 0 && attackingRank < 8 &&
+        attackingFile >= 0 && attackingFile < 8
+      ) {
+        val attackingSquare = attackingRank * 8 + attackingFile
+        getPiece(attackingSquare).exists(p =>
+          p.side == attackingSide && p.pieceType == PieceType.KNIGHT,
+        )
+      } else false
+    }
+  }
+
   def getPiece(square: Int): Option[Piece]
   def applyMove(move: Move): ChessBoard
   def lastMove: Option[Move]
@@ -49,7 +85,9 @@ trait ChessBoard {
   def isInCheck(side: Side): Boolean
   def isCheckmate(side: Side): Boolean
   def isStalemate(side: Side): Boolean
-  def isSquareAttacked(square: Int, by: Side): Boolean
+
+  def isSquareAttacked(square: Int, by: Side): Boolean =
+    isAttackedByKnight(square, by)
 }
 
 object Board {
@@ -89,8 +127,6 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
   def isCheckmate(side: Side): Boolean = ???
 
   def isStalemate(side: Side): Boolean = ???
-
-  def isSquareAttacked(square: Int, by: Side): Boolean = ???
 
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
