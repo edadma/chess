@@ -3,8 +3,7 @@ package io.github.edadma.chess
 import scala.scalajs.js
 
 @main def run(): Unit =
-  println("asdf")
-
+  println(123)
 //  val g      = new Game
 //  val player = new NestedEngine
 //

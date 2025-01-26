@@ -2,6 +2,7 @@ package io.github.edadma.chess
 
 import io.github.edadma.chess.ChessBoard.knightOffsets
 
+import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
 
 val A1 = "A1"; val B1 = "B1"; val C1 = "C1"; val D1 = "D1"; val E1 = "E1"; val F1 = "F1"; val G1 = "G1"; val H1 = "H1"
@@ -76,6 +77,7 @@ object ChessBoard {
 trait ChessBoard {
   def getPieces: Iterator[(Int, Piece)]
   def getPiece(square: Int): Option[Piece]
+  def getPiece(file: Int, rank: Int): Option[Piece]
   def getMoves(side: Side): Iterator[ChessMove]
 
   def getPiecesBySide(side: Side): Iterator[(Int, Piece)] = {
@@ -153,29 +155,40 @@ trait ChessBoard {
     )
   }
 
-  protected def getRookMoveSquares(fromSquare: Int, includeCapturable: Boolean = true): Iterator[Int] = {
+  protected[chess] def ray(fromSquare: Int, fileDirection: Int, rankDirection: Int): Iterator[Int] = {
     val fromRank = fromSquare / 8
     val fromFile = fromSquare % 8
 
+    new Iterator[Int] {
+      private var curFile = fromFile
+      private var curRank = fromRank
+      private var hit     = false
+
+      def hasNext: Boolean =
+        curFile += fileDirection
+        curRank += rankDirection
+        curFile >= 0 && curFile <= 7 && curRank >= 0 && curRank <= 7 && !hit
+
+      def next: Int =
+        val res = curRank * 8 + curFile
+
+        hit = getPiece(res).nonEmpty
+        res
+    }
+  }
+
+  protected[chess] def getRookMoveSquares(fromSquare: Int): Iterator[Int] = {
     ChessBoard.rookDirections.iterator.flatMap { case (rankDelta, fileDelta) =>
-      (1 to 7).iterator
-        .map { i =>
-          val toRank = fromRank + (rankDelta * i)
-          val toFile = fromFile + (fileDelta * i)
-          (toRank, toFile)
-        }
-        .takeWhile { case (rank, file) =>
-          rank >= 0 && rank < 8 && file >= 0 && file < 8 &&
-          (includeCapturable || getPiece(rank * 8 + file).isEmpty)
-        }
-        .map { case (rank, file) => rank * 8 + file }
+      ray(fromSquare, fileDelta, rankDelta)
     }
   }
 
   protected def getRookMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
     getPiecesByType(PieceType.ROOK, side).flatMap { fromSquare =>
       getRookMoveSquares(fromSquare)
-        .filterNot(toSquare => getPiece(toSquare).exists(_.side == side))
+        .filter(toSquare =>
+          getPiece(toSquare).forall(_.side != side),
+        )
         .map(toSquare =>
           factory.create(fromSquare, toSquare, getPiece(fromSquare).get, MoveType.NORMAL, None),
         )
@@ -184,8 +197,9 @@ trait ChessBoard {
 
   protected def isAttackedByRook(targetSquare: Int, attackingSide: Side): Boolean = {
     if (getPiece(targetSquare).exists(_.side == attackingSide)) false
-    else getRookMoveSquares(targetSquare, includeCapturable = true).exists { square =>
-      getPiece(square).exists(p => p.side == attackingSide && p.pieceType == PieceType.ROOK)
+    else getRookMoveSquares(targetSquare).exists { square =>
+      val piece = getPiece(square)
+      piece.exists(p => p.side == attackingSide && p.pieceType == PieceType.ROOK)
     }
   }
 
@@ -229,6 +243,8 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
   }
 
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
+
+  def getPiece(file: Int, rank: Int): Option[Piece] = pieces.get(toAlgebraic(rank * 8 + file))
 
   def getMoves(side: Side): Iterator[ChessMove] = getMoves(side, MoveFactory)
 
