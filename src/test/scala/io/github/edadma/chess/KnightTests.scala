@@ -36,4 +36,21 @@ class KnightTests extends ChessSpec {
       assert(!board.isSquareAttacked(27, Black))
     }
   }
+
+  "blocked by friendly piece" in {
+    val board = Board.fromString(
+      """
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  n  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  p  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |""".stripMargin,
+    )
+
+    assert(!board.isSquareAttacked(fromAlgebraic("e4"), Black)) // Square with black pawn
+  }
 }

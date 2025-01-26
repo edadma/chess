@@ -56,25 +56,26 @@ object ChessBoard {
 }
 
 trait ChessBoard {
-
   def isAttackedByKnight(targetSquare: Int, attackingSide: Side): Boolean = {
     val targetRank = targetSquare / 8
     val targetFile = targetSquare % 8
 
-    knightOffsets.exists { case (rankOffset, fileOffset) =>
-      val attackingRank = targetRank + rankOffset
-      val attackingFile = targetFile + fileOffset
+    if (getPiece(targetSquare).exists(_.side == attackingSide)) false
+    else
+      knightOffsets.exists { case (rankOffset, fileOffset) =>
+        val attackingRank = targetRank + rankOffset
+        val attackingFile = targetFile + fileOffset
 
-      if (
-        attackingRank >= 0 && attackingRank < 8 &&
-        attackingFile >= 0 && attackingFile < 8
-      ) {
-        val attackingSquare = attackingRank * 8 + attackingFile
-        getPiece(attackingSquare).exists(p =>
-          p.side == attackingSide && p.pieceType == PieceType.KNIGHT,
-        )
-      } else false
-    }
+        if (
+          attackingRank >= 0 && attackingRank < 8 &&
+          attackingFile >= 0 && attackingFile < 8
+        ) {
+          val attackingSquare = attackingRank * 8 + attackingFile
+          getPiece(attackingSquare).exists(p =>
+            p.side == attackingSide && p.pieceType == PieceType.KNIGHT,
+          )
+        } else false
+      }
   }
 
   def getPiece(square: Int): Option[Piece]
