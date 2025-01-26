@@ -53,4 +53,30 @@ class KnightTests extends ChessSpec {
 
     assert(!board.isSquareAttacked(fromAlgebraic("e4"), Black)) // Square with black pawn
   }
+
+  "corner" - {
+    val board = Board.fromString(
+      """
+        |.  .  .  .  .  .  .  n
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |.  .  .  .  .  .  .  .
+        |""".stripMargin,
+    )
+
+    val expectedAttacks = List(
+      (5, 6),
+      (6, 5),
+    ).map { case (f, r) => r * 8 + f }
+
+    expectedAttacks.foreach { square =>
+      s"square ${toAlgebraic(square)} should be attacked" in {
+        assert(board.isSquareAttacked(square, Black))
+      }
+    }
+  }
 }
