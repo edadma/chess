@@ -21,7 +21,7 @@ PawnTests.scala
 PinTests.scala
 QueenTests.scala
 RookTests.scala
-Stalemate.scale
+Stalemate.scala
 
 # build files
 ./
