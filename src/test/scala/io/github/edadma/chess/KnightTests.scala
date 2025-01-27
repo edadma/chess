@@ -57,7 +57,7 @@ class KnightTests extends ChessSpec {
 
     assert(!board.isSquareAttacked(fromAlgebraic("e4"), Black)) // Square with black pawn
 
-    board.getMoves(Black).length shouldBe 7
+    board.getMoves(Black).count(_.piece == BlackKnight) shouldBe 7
   }
 
   "corner" - {

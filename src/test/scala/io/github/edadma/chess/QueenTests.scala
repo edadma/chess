@@ -67,7 +67,7 @@ class QueenTests extends ChessSpec {
                                    |""".stripMargin)
 
     assert(!board.isSquareAttacked(fromAlgebraic("e4"), Black))
-    board.getMoves(Black).length shouldBe 25
+    board.getMoves(Black).count(_.piece == BlackQueen) shouldBe 25
   }
 
   "corner" - {

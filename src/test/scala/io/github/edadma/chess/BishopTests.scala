@@ -49,7 +49,7 @@ class BishopTests extends ChessSpec {
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  b  .  .  .  .
-        |.  .  .  .  p  .  .  .
+        |.  .  .  .  P  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
@@ -57,10 +57,10 @@ class BishopTests extends ChessSpec {
         |""".stripMargin,
     )
 
-    assert(!board.isSquareAttacked(fromAlgebraic("e5"), Black)) // Square with black pawn
-    assert(!board.isSquareAttacked(fromAlgebraic("f4"), Black)) // Square beyond black pawn
+    assert(board.isSquareAttacked(fromAlgebraic("e5"), Black))  // Square with white pawn
+    assert(!board.isSquareAttacked(fromAlgebraic("f4"), Black)) // Square beyond white pawn
 
-    board.getMoves(Black).length shouldBe 7
+    board.getMoves(Black).count(_.piece == BlackBishop) shouldBe 8
   }
 
   "corner" - {

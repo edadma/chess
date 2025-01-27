@@ -8,13 +8,13 @@ import pprint.pprintln
     """
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
-      |.  .  .  k  .  .  .  .
+      |.  .  .  b  .  .  .  .
+      |.  .  .  .  P  .  .  .
       |.  .  .  .  .  .  .  .
-      |.  .  .  .  p  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |""".stripMargin,
   )
 
-  println(board.getMoves(Black).filter(_.piece == BlackKnight).toList)
+  println(board.isSquareAttacked(fromAlgebraic("g3"), Black))
