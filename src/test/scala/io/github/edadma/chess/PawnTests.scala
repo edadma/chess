@@ -100,4 +100,58 @@ class PawnTests extends ChessSpec {
       )
     }
   }
+
+  "blocked movements" - {
+    "blocked by enemy piece" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  P  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      board.getMoves(White).filter(_.piece == WhitePawn) shouldBe empty
+    }
+
+    "blocked by friendly piece" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  N  .  .  .  .
+          |.  .  .  P  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      board.getMoves(White).filter(_.piece == WhitePawn) shouldBe empty
+    }
+
+    "two-square advance blocked by enemy piece" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  P  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhitePawn).map(m => (m.fromIndex, m.toIndex)).toSet
+      moves should contain only (fromAlgebraic("d2") -> fromAlgebraic("d3"))
+    }
+  }
 }
