@@ -362,9 +362,10 @@ trait ChessBoard {
     isAttackedByKnight(square, by) || isAttackedByKing(square, by) || isAttackedByRook(square, by)
       || isAttackedByBishop(square, by) || isAttackedByPawn(square, by)
 
+  def isCheckmate(side: Side): Boolean = isInCheck(side) && getMoves(side).isEmpty
+
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
-  def isCheckmate(side: Side): Boolean
   def isStalemate(side: Side): Boolean
 }
 
@@ -406,8 +407,6 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
     val to    = toAlgebraic(move.toIndex)
 
     Board(pieces + (to -> piece) - from, Some(move.asInstanceOf[Move]))
-
-  def isCheckmate(side: Side): Boolean = ???
 
   def isStalemate(side: Side): Boolean = ???
 

@@ -6,15 +6,16 @@ import pprint.pprintln
 @main def run(): Unit =
   val board = Board.fromString(
     """
+      |r  n  b  .  k  b  n  r
+      |p  p  p  p  .  p  p  p
+      |.  .  .  .  p  .  .  .
       |.  .  .  .  .  .  .  .
-      |.  .  .  .  .  .  .  .
-      |.  .  .  b  .  .  .  .
-      |.  .  .  .  P  .  .  .
-      |.  .  .  .  .  .  .  .
-      |.  .  .  .  .  .  .  .
-      |.  .  .  .  .  .  .  .
-      |.  .  .  .  .  .  .  .
-      |""".stripMargin,
+      |.  .  .  .  .  .  P  q
+      |.  .  .  .  .  P  .  .
+      |P  P  P  P  P  .  .  P
+      |R  N  B  Q  K  B  N  R
+      |      |""".stripMargin,
   )
 
-  println(board.isSquareAttacked(fromAlgebraic("g3"), Black))
+  println(board.isCheckmate(White))
+  println(board.getMoves(White).toList)
