@@ -88,4 +88,123 @@ class RookTests extends ChessSpec {
       board.getMoves(Black).length shouldBe 14
     }
   }
+
+  "captures" - {
+    "should capture enemy pieces" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  R  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhiteRook).map(m => (m.fromIndex, m.toIndex)).toSet
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d7")) // Capture upward
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d4")) // Capture downward
+    }
+
+    "should stop after capture" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  n  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  R  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhiteRook).map(m => (m.fromIndex, m.toIndex)).toSet
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d7"))
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("d8"))
+    }
+  }
+
+  "blocked by enemy piece" - {
+    "horizontal blockage" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  p  R  n  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhiteRook).map(m => (m.fromIndex, m.toIndex)).toSet
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("c5")) // Can capture left
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("e5")) // Can capture right
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("b5")) // Cannot move past captured piece
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("f5")) // Cannot move past captured piece
+    }
+
+    "vertical blockage" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  R  .  .  .  .
+          |.  .  .  n  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhiteRook).map(m => (m.fromIndex, m.toIndex)).toSet
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d7")) // Can capture up
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d4")) // Can capture down
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("d8")) // Cannot move past captured piece
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("d3")) // Cannot move past captured piece
+    }
+  }
+
+  "mixed capture scenarios" - {
+    "should handle multiple potential captures" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  n  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  p  .  .  .  .
+          |p  .  p  R  b  .  n  p
+          |.  .  .  q  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhiteRook).map(m => (m.fromIndex, m.toIndex)).toSet
+
+      // Horizontal captures
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("c5"))
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("e5"))
+
+      // Vertical captures
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d6"))
+      moves should contain(fromAlgebraic("d5") -> fromAlgebraic("d4"))
+
+      // Should not move past captures
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("d8"))
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("d3"))
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("a5"))
+      moves should not contain (fromAlgebraic("d5") -> fromAlgebraic("h5"))
+
+      moves.size shouldBe 4
+    }
+  }
 }
