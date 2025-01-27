@@ -13,6 +13,7 @@ nodejs.scala
 ./src/test/scala/io/github/edadma/chess
 BishopTests.scala
 BoardParserTests.scala
+CheckmateTests.scala
 ChessSpec.scala
 KingTests.scala
 KnightTests.scala
