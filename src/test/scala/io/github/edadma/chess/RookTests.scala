@@ -52,7 +52,7 @@ class RookTests extends ChessSpec {
     assert(!board.isSquareAttacked(fromAlgebraic("d4"), Black)) // Square with black pawn
     assert(!board.isSquareAttacked(fromAlgebraic("d3"), Black)) // Square behind black pawn
 
-    board.getMoves(Black).length shouldBe 10
+    board.getMoves(Black).count(_.piece == BlackRook) shouldBe 10
   }
 
   "corner" - {
