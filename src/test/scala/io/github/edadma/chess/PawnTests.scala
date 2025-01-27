@@ -154,4 +154,37 @@ class PawnTests extends ChessSpec {
       moves should contain only (fromAlgebraic("d2") -> fromAlgebraic("d3"))
     }
   }
+
+  "capture with promotion" - {
+    "diagonal capture with promotion options" in {
+      val board = Board.fromString(
+        """
+          |.  .  .  n  b  n  .  .
+          |.  .  .  .  P  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |.  .  .  .  .  .  .  .
+          |""".stripMargin,
+      )
+
+      val moves = board.getMoves(White).filter(_.piece == WhitePawn).toSet
+
+      // Left capture promotion
+      moves should contain(Move("e7", "d8", WhitePawn, MoveType.NORMAL, Some(WhiteQueen)))
+      moves should contain(Move("e7", "d8", WhitePawn, MoveType.NORMAL, Some(WhiteRook)))
+      moves should contain(Move("e7", "d8", WhitePawn, MoveType.NORMAL, Some(WhiteBishop)))
+      moves should contain(Move("e7", "d8", WhitePawn, MoveType.NORMAL, Some(WhiteKnight)))
+
+      // Right capture promotion
+      moves should contain(Move("e7", "f8", WhitePawn, MoveType.NORMAL, Some(WhiteQueen)))
+      moves should contain(Move("e7", "f8", WhitePawn, MoveType.NORMAL, Some(WhiteRook)))
+      moves should contain(Move("e7", "f8", WhitePawn, MoveType.NORMAL, Some(WhiteBishop)))
+      moves should contain(Move("e7", "f8", WhitePawn, MoveType.NORMAL, Some(WhiteKnight)))
+
+      moves.size shouldBe 8
+    }
+  }
 }
