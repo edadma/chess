@@ -236,14 +236,131 @@ trait ChessBoard {
     }
   }
 
+  protected def getPawnMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    val direction     = if (side == White) 1 else -1
+    val startRank     = if (side == White) 1 else 6
+    val promotionRank = if (side == White) 7 else 0
+
+    getPiecesByType(Set(PieceType.PAWN), side).flatMap { fromSquare =>
+      val fromRank = fromSquare / 8
+      val fromFile = fromSquare % 8
+      val moves    = new ListBuffer[ChessMove]()
+
+      // Single square advance
+      val oneSquare = fromSquare + (direction * 8)
+      if (oneSquare >= 0 && oneSquare < 64 && getPiece(oneSquare).isEmpty) {
+        if (fromRank + direction == promotionRank) {
+          // Pawn promotion
+          List(WhiteQueen, WhiteRook, WhiteBishop, WhiteKnight).foreach { piece =>
+            val promotionPiece = piece match {
+              case WhiteQueen | BlackQueen   => if (side == White) WhiteQueen else BlackQueen
+              case WhiteRook | BlackRook     => if (side == White) WhiteRook else BlackRook
+              case WhiteBishop | BlackBishop => if (side == White) WhiteBishop else BlackBishop
+              case WhiteKnight | BlackKnight => if (side == White) WhiteKnight else BlackKnight
+              case _                         => WhiteQueen // Default case - should never happen
+            }
+            moves += factory.create(
+              fromSquare,
+              oneSquare,
+              getPiece(fromSquare).get,
+              MoveType.NORMAL,
+              Some(promotionPiece),
+            )
+          }
+        } else {
+          moves += factory.create(fromSquare, oneSquare, getPiece(fromSquare).get, MoveType.NORMAL, None)
+        }
+
+        // Two square advance from starting position
+        if (fromRank == startRank) {
+          val twoSquares = fromSquare + (direction * 16)
+          if (getPiece(twoSquares).isEmpty) {
+            moves += factory.create(fromSquare, twoSquares, getPiece(fromSquare).get, MoveType.NORMAL, None)
+          }
+        }
+      }
+
+      // Captures
+      for (fileOffset <- List(-1, 1)) {
+        val captureSquare = fromSquare + (direction * 8) + fileOffset
+        if (captureSquare >= 0 && captureSquare < 64) {
+          val captureFile = captureSquare % 8
+          if (math.abs(captureFile - fromFile) == 1) {
+            // Normal capture
+            getPiece(captureSquare).foreach { piece =>
+              if (piece.side != side) {
+                if (fromRank + direction == promotionRank) {
+                  // Capture with promotion
+                  List(WhiteQueen, WhiteRook, WhiteBishop, WhiteKnight).foreach { piece =>
+                    val promotionPiece = piece match {
+                      case WhiteQueen | BlackQueen   => if (side == White) WhiteQueen else BlackQueen
+                      case WhiteRook | BlackRook     => if (side == White) WhiteRook else BlackRook
+                      case WhiteBishop | BlackBishop => if (side == White) WhiteBishop else BlackBishop
+                      case WhiteKnight | BlackKnight => if (side == White) WhiteKnight else BlackKnight
+                      case _                         => WhiteQueen // Default case - should never happen
+                    }
+                    moves += factory.create(
+                      fromSquare,
+                      captureSquare,
+                      getPiece(fromSquare).get,
+                      MoveType.NORMAL,
+                      Some(promotionPiece),
+                    )
+                  }
+                } else {
+                  moves += factory.create(fromSquare, captureSquare, getPiece(fromSquare).get, MoveType.NORMAL, None)
+                }
+              }
+            }
+
+            // En passant
+            lastMove.foreach { move =>
+              if (
+                move.piece.pieceType == PieceType.PAWN &&
+                math.abs(move.fromIndex - move.toIndex) == 16 &&
+                move.toIndex % 8 == captureFile &&
+                move.toIndex / 8 == fromRank
+              ) {
+                moves += factory.create(fromSquare, captureSquare, getPiece(fromSquare).get, MoveType.EN_PASSANT, None)
+              }
+            }
+          }
+        }
+      }
+
+      moves.iterator
+    }
+  }
+
+  protected def isAttackedByPawn(targetSquare: Int, attackingSide: Side): Boolean = {
+    val direction  = if (attackingSide == White) 1 else -1
+    val targetFile = targetSquare % 8
+    var isAttacked = false
+
+    for (fileOffset <- List(-1, 1) if !isAttacked) {
+      val attackerSquare = targetSquare - (direction * 8) + fileOffset
+      if (attackerSquare >= 0 && attackerSquare < 64) {
+        val attackerFile = attackerSquare % 8
+        if (math.abs(attackerFile - targetFile) == 1) {
+          getPiece(attackerSquare).foreach { piece =>
+            if (piece.side == attackingSide && piece.pieceType == PieceType.PAWN) {
+              isAttacked = true
+            }
+          }
+        }
+      }
+    }
+    isAttacked
+  }
+
   def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
     (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory) ++ getRookMoves(side, moveFactory)
-      ++ getBishopMoves(side, moveFactory))
+      ++ getBishopMoves(side, moveFactory) ++ getPawnMoves(side, moveFactory))
       .filterNot(move => applyMove(move).isInCheck(side))
 
   def isSquareAttacked(square: Int, by: Side): Boolean =
     isAttackedByKnight(square, by) || isAttackedByKing(square, by) || isAttackedByRook(square, by)
-      || isAttackedByBishop(square, by)
+      || isAttackedByBishop(square, by) || isAttackedByPawn(square, by)
 
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]

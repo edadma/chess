@@ -16,7 +16,6 @@ class PinTests extends ChessSpec {
 
       // Bishop should only be able to move along the pin line
       val moves = board.getMoves(White).filter(_.piece == WhiteBishop).toSet
-      println(moves)
       moves.map(_.toIndex) should contain only fromAlgebraic("c6")
     }
 

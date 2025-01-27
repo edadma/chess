@@ -47,8 +47,8 @@ class KingTests extends ChessSpec {
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  k  .  .  .  .
-        |.  .  .  .  p  .  .  .
         |.  .  .  .  .  .  .  .
+        |.  .  .  .  p  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
         |.  .  .  .  .  .  .  .
@@ -57,7 +57,7 @@ class KingTests extends ChessSpec {
 
     assert(!board.isSquareAttacked(fromAlgebraic("e5"), Black))
 
-    board.getMoves(Black).length shouldBe 7
+    board.getMoves(Black).count(_.piece == BlackKnight) shouldBe 7
   }
 
   "corner" - {

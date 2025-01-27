@@ -16,6 +16,7 @@ BoardParserTests.scala
 ChessSpec.scala
 KingTests.scala
 KnightTests.scala
+PawnTests.scala
 PinTests.scala
 QueenTests.scala
 RookTests.scala

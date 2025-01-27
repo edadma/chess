@@ -8,13 +8,13 @@ import pprint.pprintln
     """
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
+      |.  .  .  k  .  .  .  .
       |.  .  .  .  .  .  .  .
-      |.  .  .  r  .  .  .  .
-      |.  .  .  p  .  .  .  .
+      |.  .  .  .  p  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |.  .  .  .  .  .  .  .
       |""".stripMargin,
   )
 
-  println(board.getMoves(Black).toList)
+  println(board.getMoves(Black).filter(_.piece == BlackKnight).toList)
