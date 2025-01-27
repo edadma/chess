@@ -364,9 +364,10 @@ trait ChessBoard {
 
   def isCheckmate(side: Side): Boolean = isInCheck(side) && getMoves(side).isEmpty
 
+  def isStalemate(side: Side): Boolean = !isInCheck(side) && getMoves(side).isEmpty
+
   def applyMove(move: ChessMove): ChessBoard
   def lastMove: Option[Move]
-  def isStalemate(side: Side): Boolean
 }
 
 object Board {
@@ -407,8 +408,6 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
     val to    = toAlgebraic(move.toIndex)
 
     Board(pieces + (to -> piece) - from, Some(move.asInstanceOf[Move]))
-
-  def isStalemate(side: Side): Boolean = ???
 
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
