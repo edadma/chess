@@ -87,6 +87,43 @@ trait ChessBoard {
   def getPiece(file: Int, rank: Int): Option[Piece]
   def getMoves(side: Side): Iterator[ChessMove]
 
+  def canCastleKingside(side: Side): Boolean
+
+  def canCastleQueenside(side: Side): Boolean
+
+  protected def getCastlingMoves(side: Side, factory: ChessMoveFactory): Iterator[ChessMove] = {
+    if (!isInCheck(side)) {
+      val rank    = if (side == White) 0 else 7
+      val kingPos = rank * 8 + 4
+      val moves   = new ListBuffer[ChessMove]()
+
+      // Kingside castling
+      if (
+        canCastleKingside(side) &&
+        getPiece(rank * 8 + 5).isEmpty &&
+        getPiece(rank * 8 + 6).isEmpty &&
+        !isSquareAttacked(rank * 8 + 5, side.opposite) &&
+        !isSquareAttacked(rank * 8 + 6, side.opposite)
+      ) {
+        moves += factory.create(kingPos, rank * 8 + 6, getPiece(kingPos).get, MoveType.CASTLE_KINGSIDE, None)
+      }
+
+      // Queenside castling
+      if (
+        canCastleQueenside(side) &&
+        getPiece(rank * 8 + 3).isEmpty &&
+        getPiece(rank * 8 + 2).isEmpty &&
+        getPiece(rank * 8 + 1).isEmpty &&
+        !isSquareAttacked(rank * 8 + 3, side.opposite) &&
+        !isSquareAttacked(rank * 8 + 2, side.opposite)
+      ) {
+        moves += factory.create(kingPos, rank * 8 + 2, getPiece(kingPos).get, MoveType.CASTLE_QUEENSIDE, None)
+      }
+
+      moves.iterator
+    } else Iterator.empty
+  }
+
   def getPiecesBySide(side: Side): Iterator[(Int, Piece)] = {
     getPieces.filter(_._2.side == side)
   }
@@ -389,7 +426,14 @@ object Board {
     Board(parseBoardString(board) map ((square, piece) => toAlgebraic(square) -> piece) toMap)
 }
 
-case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) extends ChessBoard:
+case class Board(
+    pieces: Map[String, Piece],
+    lastMove: Option[Move] = None,
+    whiteCanCastleKingside: Boolean = true,
+    whiteCanCastleQueenside: Boolean = true,
+    blackCanCastleKingside: Boolean = true,
+    blackCanCastleQueenside: Boolean = true,
+) extends ChessBoard:
   override def getPieces: Iterator[(Int, Piece)] = {
     pieces.iterator.map { case (square, piece) =>
       (fromAlgebraic(square), piece)
@@ -407,7 +451,50 @@ case class Board(pieces: Map[String, Piece], lastMove: Option[Move] = None) exte
     val piece = pieces(from)
     val to    = toAlgebraic(move.toIndex)
 
-    Board(pieces + (to -> piece) - from, Some(move.asInstanceOf[Move]))
+    // Update castling rights
+    val newWhiteKingside = whiteCanCastleKingside &&
+      !(piece == WhiteKing || (piece == WhiteRook && from == "h1"))
+    val newWhiteQueenside = whiteCanCastleQueenside &&
+      !(piece == WhiteKing || (piece == WhiteRook && from == "a1"))
+    val newBlackKingside = blackCanCastleKingside &&
+      !(piece == BlackKing || (piece == BlackRook && from == "h8"))
+    val newBlackQueenside = blackCanCastleQueenside &&
+      !(piece == BlackKing || (piece == BlackRook && from == "a8"))
+
+    // Handle actual castling moves
+    val newPieces = move.moveType match {
+      case MoveType.CASTLE_KINGSIDE =>
+        val rookFrom = if (piece.side == White) "h1" else "h8"
+        val rookTo   = if (piece.side == White) "f1" else "f8"
+        pieces + (to -> piece) + (rookTo -> pieces(rookFrom)) - from - rookFrom
+      case MoveType.CASTLE_QUEENSIDE =>
+        val rookFrom = if (piece.side == White) "a1" else "a8"
+        val rookTo   = if (piece.side == White) "d1" else "d8"
+        pieces + (to -> piece) + (rookTo -> pieces(rookFrom)) - from - rookFrom
+      case _ =>
+        pieces + (to -> piece) - from
+    }
+
+    Board(
+      newPieces,
+      Some(move.asInstanceOf[Move]),
+      newWhiteKingside,
+      newWhiteQueenside,
+      newBlackKingside,
+      newBlackQueenside,
+    )
+
+  def canCastleKingside(side: Side): Boolean =
+    side match {
+      case White => whiteCanCastleKingside
+      case Black => blackCanCastleKingside
+    }
+
+  def canCastleQueenside(side: Side): Boolean =
+    side match {
+      case White => whiteCanCastleQueenside
+      case Black => blackCanCastleQueenside
+    }
 
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
