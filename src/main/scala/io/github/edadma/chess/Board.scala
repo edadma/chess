@@ -392,7 +392,8 @@ trait ChessBoard {
 
   def getMoves(side: Side, moveFactory: ChessMoveFactory): Iterator[ChessMove] =
     (getKnightMoves(side, moveFactory) ++ getKingMoves(side, moveFactory) ++ getRookMoves(side, moveFactory)
-      ++ getBishopMoves(side, moveFactory) ++ getPawnMoves(side, moveFactory))
+      ++ getBishopMoves(side, moveFactory) ++ getPawnMoves(side, moveFactory) ++
+      getCastlingMoves(side, moveFactory))
       .filterNot(move => applyMove(move).isInCheck(side))
 
   def isSquareAttacked(square: Int, by: Side): Boolean =
@@ -423,7 +424,24 @@ object Board {
     )
 
   def fromString(board: String): Board =
-    Board(parseBoardString(board) map ((square, piece) => toAlgebraic(square) -> piece) toMap)
+    val pieces = parseBoardString(board) map ((square, piece) => toAlgebraic(square) -> piece) toMap
+
+    // Determine initial castling rights based on piece positions
+    val whiteKingOnE1 = pieces.get("e1").contains(WhiteKing)
+    val whiteRookOnA1 = pieces.get("a1").contains(WhiteRook)
+    val whiteRookOnH1 = pieces.get("h1").contains(WhiteRook)
+    val blackKingOnE8 = pieces.get("e8").contains(BlackKing)
+    val blackRookOnA8 = pieces.get("a8").contains(BlackRook)
+    val blackRookOnH8 = pieces.get("h8").contains(BlackRook)
+
+    Board(
+      pieces,
+      None,
+      whiteCanCastleKingside = whiteKingOnE1 && whiteRookOnH1,
+      whiteCanCastleQueenside = whiteKingOnE1 && whiteRookOnA1,
+      blackCanCastleKingside = blackKingOnE8 && blackRookOnH8,
+      blackCanCastleQueenside = blackKingOnE8 && blackRookOnA8,
+    )
 }
 
 case class Board(
