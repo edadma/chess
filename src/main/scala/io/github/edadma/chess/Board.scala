@@ -514,6 +514,48 @@ case class Board(
       case Black => blackCanCastleQueenside
     }
 
+  override def toString: String = {
+    val buf = new StringBuilder("\n")
+
+    // Add file labels at top
+    buf.append("    a  b  c  d  e  f  g  h\n")
+    buf.append("   ------------------------\n")
+
+    for (rank <- 7 to 0 by -1) {
+      // Add rank number at start of line
+      buf.append(s"${rank + 1} |")
+
+      for (file <- 0 to 7) {
+        val piece = getPiece(file, rank)
+        val str = piece match {
+          case Some(WhitePawn)   => "P"
+          case Some(WhiteKnight) => "N"
+          case Some(WhiteBishop) => "B"
+          case Some(WhiteRook)   => "R"
+          case Some(WhiteQueen)  => "Q"
+          case Some(WhiteKing)   => "K"
+          case Some(BlackPawn)   => "p"
+          case Some(BlackKnight) => "n"
+          case Some(BlackBishop) => "b"
+          case Some(BlackRook)   => "r"
+          case Some(BlackQueen)  => "q"
+          case Some(BlackKing)   => "k"
+          case None              => "."
+        }
+        buf.append(s" $str ")
+      }
+
+      // Add rank number at end of line
+      buf.append(s"| ${rank + 1}\n")
+    }
+
+    // Add file labels at bottom
+    buf.append("   ------------------------\n")
+    buf.append("    a  b  c  d  e  f  g  h\n")
+
+    buf.toString
+  }
+
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
 }

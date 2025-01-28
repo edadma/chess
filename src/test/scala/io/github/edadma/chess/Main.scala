@@ -14,8 +14,7 @@ import pprint.pprintln
       |.  .  .  .  .  P  .  .
       |P  P  P  P  P  .  .  P
       |R  N  B  Q  K  B  N  R
-      |      |""".stripMargin,
+      |""".stripMargin,
   )
 
-  println(board.isCheckmate(White))
-  println(board.getMoves(White).toList)
+  println(board)
