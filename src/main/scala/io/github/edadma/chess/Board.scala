@@ -409,7 +409,7 @@ trait ChessBoard {
 }
 
 object Board {
-  def apply: Board =
+  def apply(): Board =
     Board.fromString(
       """
        r  n  b  q  k  b  n  r

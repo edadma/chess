@@ -1,82 +1,87 @@
-//package io.github.edadma.chess
-//
-//import io.github.edadma.logger.LoggerFactory
-//
-//case class GameState(
-//    board: Board,
-//    sideToMove: Side,
-//    moveNumber: Int,
-//    lastMove: Option[Move],
-//)
-//
-//class Game {
-//  private var states = List(GameState(Board(), White, 1, None))
-//  private val logger = LoggerFactory.getLogger
-//
-//  def getCurrentBoard: Board      = states.head.board
-//  def getCurrentTurn: Side        = states.head.sideToMove
-//  def getMoveNumber: Int          = states.head.moveNumber
-//  def getHistory: List[GameState] = states
-//  def getLastMove: Option[Move]   = states.head.lastMove
-//
-//  def makeMove(move: Move): Boolean = {
-//    val board = getCurrentBoard
-//
-//    if (!board.generateLegalMoves(getCurrentTurn).exists(_ == move)) {
-//      logger.warn(s"Illegal move attempted: $move")
-//      return false
-//    }
-//
-//    // Update board with move
-//    val newBoard = applyMove(board, move)
-//
-//    // Add new state
-//    states = GameState(
-//      newBoard,
-//      getCurrentTurn.opposite,
-//      if (getCurrentTurn == Black) getMoveNumber + 1 else getMoveNumber,
-//      Some(move),
-//    ) :: states
-//
-//    logger.info(s"Move made: $move")
-//    true
-//  }
-//
-//  def undoMove(): Boolean = {
-//    if (states.length == 1) {
-//      logger.warn("Cannot undo - at initial position")
-//      false
-//    } else {
-//      states = states.tail
-//      logger.info("Move undone")
-//      true
-//    }
-//  }
-//
-//  def isCheckmate(side: Side): Boolean =
-//    getCurrentBoard.isCheck(side) && !getCurrentBoard.hasLegalMoves(side)
-//
-//  def isStalemate(side: Side): Boolean = getCurrentBoard.isStalemate(side)
-//
-//  def isDraw: Boolean =
-//    isStalemate(getCurrentTurn) ||
-//      getCurrentBoard.hasInsufficientMaterial ||
-//      isThreefoldRepetition
-//
-//  private def isThreefoldRepetition: Boolean = {
-//    val currentBoard = getCurrentBoard
-//    states.count(_.board == currentBoard) >= 3
-//  }
-//
-//  private def applyMove(board: Board, move: Move): Board = {
-//    // Handle castling
-//    if (move.isCastling) {
-//      val rank = if (move.piece.isWhite) 0 else 7
-//      val (rookFrom, rookTo) =
-//        if (move.to % 8 == 6) (rank * 8 + 7, rank * 8 + 5) // Kingside
-//        else (rank * 8 + 0, rank * 8 + 3) // Queenside
-//
-//      board.makeMove(move).makeMove(Move(rookFrom, rookTo, if (move.piece.isWhite) WhiteRook else BlackRook))
-//    } else board.makeMove(move)
-//  }
-//}
+package io.github.edadma.chess
+
+class Game(start: ChessBoard = Board()) {
+  private var currentBoard: ChessBoard = start
+  private var currentTurn: Side        = White
+  private var moves: List[Move]        = List.empty
+  private var halfMoveClock: Int       = 0
+
+  def makeMove(move: Move): Boolean = {
+    // Verify it's a legal move for the current side
+    if (!currentBoard.getMoves(currentTurn).toList.contains(move)) {
+      return false
+    }
+
+    // Apply the move
+    currentBoard = currentBoard.applyMove(move)
+
+    // Update move history
+    moves = move :: moves
+
+    // Update halfmove clock - reset on pawn moves or captures
+    halfMoveClock =
+      if (move.piece.pieceType == PieceType.PAWN || currentBoard.getPiece(move.toIndex).isDefined)
+        0
+      else
+        halfMoveClock + 1
+
+    // Switch turns
+    currentTurn = currentTurn.opposite
+
+    true
+  }
+
+  def getBoard: ChessBoard = currentBoard
+
+  def getMoveHistory: List[Move] = moves
+
+  def getCurrentTurn: Side = currentTurn
+
+  def isGameOver: Boolean =
+    isCheckmate || isStalemate || isDrawByRepetition || isDrawByFiftyMoveRule
+
+  def isCheckmate: Boolean = currentBoard.isCheckmate(currentTurn)
+
+  def isStalemate: Boolean = currentBoard.isStalemate(currentTurn)
+
+  def isDrawByRepetition: Boolean = {
+    // Count occurrences of each position in the move history
+    val positions = moves.scanLeft(currentBoard)((b, m) => b.applyMove(m))
+    positions.groupBy(_.getPieces).exists(_._2.size >= 3)
+  }
+
+  def isDrawByFiftyMoveRule: Boolean = halfMoveClock >= 100 // 50 moves = 100 half moves
+
+  def isInsufficientMaterial: Boolean = {
+    val pieces = currentBoard.getPieces.map(_._2).toList
+
+    if (pieces.size <= 2) {
+      // Just kings, or king and minor piece
+      true
+    } else if (pieces.size == 3) {
+      // Check for king and bishop vs king or king and knight vs king
+      val nonKings = pieces.filter(_.pieceType != PieceType.KING)
+      nonKings.size == 1 &&
+      (nonKings.head.pieceType == PieceType.BISHOP ||
+        nonKings.head.pieceType == PieceType.KNIGHT)
+    } else false
+  }
+
+  def status: GameStatus = {
+    if (isCheckmate) Checkmate(currentTurn.opposite)
+    else if (isStalemate) Draw(DrawReason.Stalemate)
+    else if (isDrawByRepetition) Draw(DrawReason.Repetition)
+    else if (isDrawByFiftyMoveRule) Draw(DrawReason.FiftyMoveRule)
+    else if (isInsufficientMaterial) Draw(DrawReason.InsufficientMaterial)
+    else Ongoing(currentTurn)
+  }
+}
+
+sealed trait GameStatus
+case class Ongoing(turn: Side)      extends GameStatus
+case class Checkmate(winner: Side)  extends GameStatus
+case class Draw(reason: DrawReason) extends GameStatus
+
+enum DrawReason {
+  case Stalemate, Repetition, FiftyMoveRule, InsufficientMaterial
+}
