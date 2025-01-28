@@ -37,6 +37,8 @@ class Game(start: ChessBoard = Board()) {
 
   def getCurrentTurn: Side = currentTurn
 
+  def boardToString(side: Side): String = currentBoard.boardToString(side)
+
   def isGameOver: Boolean =
     isCheckmate || isStalemate || isDrawByRepetition || isDrawByFiftyMoveRule
 

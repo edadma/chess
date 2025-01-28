@@ -86,6 +86,7 @@ trait ChessBoard {
   def getPiece(square: Int): Option[Piece]
   def getPiece(file: Int, rank: Int): Option[Piece]
   def getMoves(side: Side): Iterator[ChessMove]
+  def boardToString(side: Side): String
 
   def canCastleKingside(side: Side): Boolean
 
