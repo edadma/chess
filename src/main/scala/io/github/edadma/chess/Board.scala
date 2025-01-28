@@ -514,14 +514,16 @@ case class Board(
       case Black => blackCanCastleQueenside
     }
 
-  override def toString: String = {
+  def boardToString(side: Side): String =
     val buf = new StringBuilder("\n")
 
     // Add file labels at top
     buf.append("    a  b  c  d  e  f  g  h\n")
     buf.append("   ------------------------\n")
 
-    for (rank <- 7 to 0 by -1) {
+    val perspective = if side == White then 7 to 0 by -1 else 0 to 7
+
+    for (rank <- perspective) {
       // Add rank number at start of line
       buf.append(s"${rank + 1} |")
 
@@ -554,7 +556,9 @@ case class Board(
     buf.append("    a  b  c  d  e  f  g  h\n")
 
     buf.toString
-  }
+  end boardToString
+
+  override def toString: String = boardToString(White)
 
 enum PieceType {
   case KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
