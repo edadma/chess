@@ -1,6 +1,7 @@
 package io.github.edadma.chess
 
 import io.github.edadma.chess.ChessBoard.knightOffsets
+import io.github.edadma.chess.MoveType.NORMAL
 
 import scala.collection.mutable.ListBuffer
 import scala.language.postfixOps
@@ -590,7 +591,7 @@ case class Move(
     from: String,
     to: String,
     piece: Piece,
-    moveType: MoveType,
+    moveType: MoveType = NORMAL,
     promotion: Option[Piece] = None,
 ) extends ChessMove:
   def fromIndex: Int = fromAlgebraic(from)

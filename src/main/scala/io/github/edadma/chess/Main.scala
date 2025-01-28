@@ -23,11 +23,9 @@ import scala.scalajs.js
 
             if list.length != 2 then callback(null, "expected '<from> <to>'")
             else
-              val List(from, to) = list map Square.fromAlgebraic
+              val List(from, to) = list map fromAlgebraic
 
-              if from.isEmpty then error("invalid <from>")
-              else if to.isEmpty then error("invalid <to>")
-              else if !g.makeMove(Move(from.get, to.get)) then
+              if !g.makeMove(Move(from, to)) then
                 error("illegal move")
                 repl.displayPrompt()
               else
