@@ -88,6 +88,8 @@ trait ChessBoard {
   def getMoves(side: Side): Iterator[ChessMove]
   def boardToString(side: Side): String
   def moveFactory: ChessMoveFactory
+  def applyMove(move: ChessMove): ChessBoard
+  def lastMove: Option[ChessMove]
 
   def canCastleKingside(side: Side): Boolean
 
@@ -406,8 +408,94 @@ trait ChessBoard {
 
   def isStalemate(side: Side): Boolean = !isInCheck(side) && getMoves(side).isEmpty
 
-  def applyMove(move: ChessMove): ChessBoard
-  def lastMove: Option[ChessMove]
+  private def getPieceSymbol(piece: Piece): String = piece.pieceType match {
+    case PieceType.KING   => "K"
+    case PieceType.QUEEN  => "Q"
+    case PieceType.ROOK   => "R"
+    case PieceType.BISHOP => "B"
+    case PieceType.KNIGHT => "N"
+    case _                => "" // Pawns don't have a symbol in SAN
+  }
+
+  private def getFileRankFromIndex(index: Int): (Char, Int) = {
+    val file = ('a' + (index % 8)).toChar
+    val rank = (index / 8) + 1
+    (file, rank)
+  }
+
+  def lastMoveToSAN: String = {
+    val builder = new StringBuilder
+
+    lastMove.get.moveType match {
+      case MoveType.CASTLE_KINGSIDE =>
+        builder.append("O-O")
+      case MoveType.CASTLE_QUEENSIDE =>
+        builder.append("O-O-O")
+      case _ =>
+        // Add piece symbol (except for pawns)
+        if (lastMove.get.piece.pieceType != PieceType.PAWN) {
+          builder.append(getPieceSymbol(lastMove.get.piece))
+        }
+
+        // Handle disambiguation
+        val similarMoves = getMoves(lastMove.get.piece.side.opposite).filter(m =>
+          m.piece == lastMove.get.piece &&
+            m.toIndex == lastMove.get.toIndex &&
+            m.fromIndex != lastMove.get.fromIndex,
+        ).toList
+
+        if (similarMoves.nonEmpty) {
+          val (fromFile, fromRank) = getFileRankFromIndex(lastMove.get.fromIndex)
+          val needRank             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._1 == fromFile)
+          val needFile             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._2 == fromRank)
+
+          if (needFile || !needRank) {
+            builder.append(fromFile)
+          }
+          if (needRank) {
+            builder.append(fromRank)
+          }
+        }
+
+        // Add 'x' for captures
+        val isCapture = getPiece(lastMove.get.toIndex).isDefined
+        if (isCapture) {
+          if (lastMove.get.piece.pieceType == PieceType.PAWN) {
+            builder.append(getFileRankFromIndex(lastMove.get.fromIndex)._1)
+          }
+          builder.append('x')
+        } else if (
+          lastMove.get.piece.pieceType == PieceType.PAWN &&
+          getFileRankFromIndex(lastMove.get.fromIndex)._1 != getFileRankFromIndex(
+            lastMove.get.toIndex,
+          )._1
+        ) {
+          // Add only the file for non-capturing diagonal pawn moves (en passant)
+          builder.append(getFileRankFromIndex(lastMove.get.fromIndex)._1)
+          builder.append('x')
+        }
+
+        // Add destination square
+        val (toFile, toRank) = getFileRankFromIndex(lastMove.get.toIndex)
+        builder.append(toFile)
+        builder.append(toRank)
+
+        // Add promotion if applicable
+        lastMove.get.promotion.foreach(p => {
+          builder.append('=')
+          builder.append(getPieceSymbol(p))
+        })
+    }
+
+    // Add check/checkmate symbols
+    if (isCheckmate(lastMove.get.piece.side.opposite)) {
+      builder.append('#')
+    } else if (isInCheck(lastMove.get.piece.side.opposite)) {
+      builder.append('+')
+    }
+
+    builder.toString
+  }
 }
 
 object Board {
