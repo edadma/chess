@@ -40,20 +40,20 @@ import scala.scalajs.js
                 val piece          = g.getBoard.getPiece(fromAlgebraic(from))
 
                 try {
-                  if (
-                    piece.isEmpty ||
-                    !g.makeMove(g.moveFactory.create(
-                      fromAlgebraic(from),
-                      fromAlgebraic(to),
-                      piece.get,
-                      MoveType.NORMAL,
-                      None,
-                    ))
-                  ) {
+                  val move = g.moveFactory.create(
+                    fromAlgebraic(from),
+                    fromAlgebraic(to),
+                    piece.get,
+                    MoveType.NORMAL,
+                    None,
+                  )
+
+                  if (piece.isEmpty || !g.makeMove(move)) {
                     error("Illegal move")
                     repl.displayPrompt()
                   } else {
                     println()
+                    println(s"Your move: ${g.lastMoveSAN}")
                     println(g.boardToString(White))
 
                     if (g.isCheckmate) {
@@ -73,6 +73,7 @@ import scala.scalajs.js
                           repl.displayPrompt()
                         case Some(move) =>
                           g.makeMove(move)
+                          println(s"Computer's move: ${g.lastMoveSAN}")
                           println()
                           println(g.boardToString(White))
 
