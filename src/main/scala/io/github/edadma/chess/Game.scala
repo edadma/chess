@@ -1,41 +1,27 @@
 package io.github.edadma.chess
 
 class Game(start: ChessBoard = Board()) {
-  private var currentBoard: ChessBoard = start
+  private var boards: List[ChessBoard] = List(start)
   private var currentTurn: Side        = White
-  private var moves: List[ChessMove]   = List.empty
-  private var halfMoveClock: Int       = 0
+
+  def currentBoard: ChessBoard          = boards.head
+  def boardHistory: List[ChessBoard]    = boards.reverse
+  def previousBoard: Option[ChessBoard] = boards.tail.headOption
 
   def moveFactory: ChessMoveFactory = currentBoard.moveFactory
 
   def makeMove(move: ChessMove): Boolean = {
-    // Verify it's a legal move for the current side
     if (!currentBoard.getMoves(currentTurn).toList.contains(move)) {
       return false
     }
 
-    // Apply the move
-    currentBoard = currentBoard.applyMove(move)
-
-    // Update move history
-    moves = move :: moves
-
-    // Update halfmove clock - reset on pawn moves or captures
-    halfMoveClock =
-      if (move.piece.pieceType == PieceType.PAWN || currentBoard.getPiece(move.toIndex).isDefined)
-        0
-      else
-        halfMoveClock + 1
-
-    // Switch turns
+    val newBoard = currentBoard.applyMove(move)
+    boards = newBoard :: boards
     currentTurn = currentTurn.opposite
-
     true
   }
 
   def getBoard: ChessBoard = currentBoard
-
-  def getMoveHistory: List[ChessMove] = moves
 
   def getCurrentTurn: Side = currentTurn
 
@@ -83,72 +69,91 @@ class Game(start: ChessBoard = Board()) {
   }
 
   def lastMoveToSAN: String = {
-    moves.headOption.map(move => moveToSAN(move, moves.tail.headOption)).getOrElse("")
+    // Need at least 2 boards to get a move
+    if (boards.size < 2) return ""
+
+    val curBoard  = currentBoard
+    val prevBoard = previousBoard.get
+    val lastMove  = curBoard.lastMove.get
+
+    // Handle castling first
+    if (lastMove.moveType == MoveType.CASTLE_KINGSIDE) return "O-O" + getCheckSuffix(curBoard, lastMove)
+    if (lastMove.moveType == MoveType.CASTLE_QUEENSIDE) return "O-O-O" + getCheckSuffix(curBoard, lastMove)
+
+    val piece = lastMove.piece
+    val pieceStr = piece.pieceType match {
+      case PieceType.PAWN   => ""
+      case PieceType.KNIGHT => "N"
+      case PieceType.BISHOP => "B"
+      case PieceType.ROOK   => "R"
+      case PieceType.QUEEN  => "Q"
+      case PieceType.KING   => "K"
+    }
+
+    // Get disambiguation if needed
+    val disambig = getDisambiguation(prevBoard, lastMove)
+
+    // Check if move was a capture
+    val isCapture = prevBoard.getPiece(lastMove.toIndex).isDefined ||
+      lastMove.moveType == MoveType.EN_PASSANT
+    val captureStr = if (isCapture) "x" else ""
+
+    // For pawns, include file when capturing
+    val pawnCapturePrefix = if (piece.pieceType == PieceType.PAWN && isCapture)
+      toAlgebraic(lastMove.fromIndex)(0).toString
+    else ""
+
+    // Handle promotions
+    val promotionStr = lastMove.promotion.map(p => "=" + pieceToChar(p)).getOrElse("")
+
+    // Build final SAN string
+    pieceStr + disambig + pawnCapturePrefix + captureStr + toAlgebraic(lastMove.toIndex) +
+      promotionStr + getCheckSuffix(curBoard, lastMove)
   }
 
-  private def moveToSAN(move: ChessMove, previousMove: Option[ChessMove]): String = {
-    val builder = new StringBuilder
-    val previousBoard = moves match {
-      case head :: tail => tail.foldRight(start)((m, b) => b.applyMove(m))
-      case Nil          => start
+  private def getDisambiguation(board: ChessBoard, move: ChessMove): String = {
+    if (move.piece.pieceType == PieceType.PAWN) return ""
+
+    // Find all pieces of same type that could move to same square
+    val otherMoves = board.getMoves(move.piece.side).filter(m =>
+      m.piece.pieceType == move.piece.pieceType &&
+        m.toIndex == move.toIndex &&
+        m.fromIndex != move.fromIndex,
+    ).toList
+
+    if (otherMoves.isEmpty) return ""
+
+    val moveFile = move.fromIndex % 8
+    val moveRank = move.fromIndex / 8
+
+    // Check if file is sufficient for disambiguation
+    val needRank = otherMoves.exists(m => m.fromIndex % 8 == moveFile)
+
+    // If file is sufficient, just use file
+    if (!needRank) {
+      ('a' + moveFile).toChar.toString
+    } else {
+      // Otherwise use rank or both file and rank
+      val needFile = otherMoves.exists(m => m.fromIndex / 8 == moveRank)
+      if (needFile)
+        toAlgebraic(move.fromIndex)
+      else
+        (moveRank + 1).toString
     }
-
-    move.moveType match {
-      case MoveType.CASTLE_KINGSIDE  => builder.append("O-O")
-      case MoveType.CASTLE_QUEENSIDE => builder.append("O-O-O")
-      case _ =>
-        if (move.piece.pieceType != PieceType.PAWN) {
-          builder.append(pieceToChar(move.piece))
-          val otherPieces = previousBoard.getPiecesBySide(move.piece.side).filter { case (square, piece) =>
-            piece.pieceType == move.piece.pieceType && square != move.fromIndex &&
-            previousBoard.getMoves(move.piece.side).exists(m => m.fromIndex == square && m.toIndex == move.toIndex)
-          }
-          if (otherPieces.nonEmpty) {
-            val fromFile = move.fromIndex % 8
-            val fromRank = move.fromIndex / 8
-            if (otherPieces.exists(_._1 % 8 == fromFile)) {
-              builder.append((fromRank + '1').toChar)
-            } else {
-              builder.append((fromFile + 'a').toChar)
-            }
-          }
-        }
-
-        val isCapture = previousBoard.getPiece(move.toIndex).isDefined ||
-          (move.piece.pieceType == PieceType.PAWN && (move.fromIndex % 8) != (move.toIndex % 8))
-        if (isCapture) {
-          if (move.piece.pieceType == PieceType.PAWN) {
-            builder.append((move.fromIndex % 8 + 'a').toChar)
-          }
-          builder.append('x')
-        }
-
-        builder.append((move.toIndex % 8 + 'a').toChar)
-        builder.append((move.toIndex / 8 + 1).toChar)
-
-        move.promotion.foreach { p =>
-          builder.append('=')
-          builder.append(pieceToChar(p))
-        }
-    }
-
-    val afterBoard = previousBoard.applyMove(move)
-    if (afterBoard.isCheckmate(move.piece.side.opposite)) {
-      builder.append('#')
-    } else if (afterBoard.isInCheck(move.piece.side.opposite)) {
-      builder.append('+')
-    }
-
-    builder.toString
   }
 
-  private def pieceToChar(piece: Piece): Char = piece.pieceType match {
-    case PieceType.KING   => 'K'
-    case PieceType.QUEEN  => 'Q'
-    case PieceType.ROOK   => 'R'
-    case PieceType.BISHOP => 'B'
-    case PieceType.KNIGHT => 'N'
-    case PieceType.PAWN   => ' '
+  private def getCheckSuffix(board: ChessBoard, move: ChessMove): String = {
+    if (board.isCheckmate(move.piece.side.opposite)) "#"
+    else if (board.isInCheck(move.piece.side.opposite)) "+"
+    else ""
+  }
+
+  private def pieceToChar(piece: Piece): String = piece match {
+    case WhiteQueen | BlackQueen   => "Q"
+    case WhiteRook | BlackRook     => "R"
+    case WhiteBishop | BlackBishop => "B"
+    case WhiteKnight | BlackKnight => "N"
+    case _                         => "Q" // Default case, should never happen
   }
 }
 
