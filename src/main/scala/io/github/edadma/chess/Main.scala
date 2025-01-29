@@ -23,17 +23,17 @@ import scala.scalajs.js
 
             if list.length != 2 then callback(null, "expected '<from> <to>'")
             else
-              val List(from, to) = list map fromAlgebraic
+              val List(from, to) = list
 
-              if !g.makeMove(Move(from, to)) then
+              if !g.makeMove(UserMove(from, to, g.getBoard)) then
                 error("illegal move")
                 repl.displayPrompt()
               else
                 println
                 println(g.boardToString(White))
 
-                if g.isCheckmate(g.getCurrentTurn) then println("Checkmate!")
-                else if g.isCheck(g.getCurrentTurn) then println("Check!")
+                if g.isCheckmate then println("Checkmate!")
+                else if g.isInCheck then println("Check!")
 
                 println
 
@@ -44,8 +44,8 @@ import scala.scalajs.js
                     println
                     println(g.boardToString(White))
 
-                    if g.isCheckmate(g.getCurrentTurn) then println("Checkmated!")
-                    else if g.isCheck(g.getCurrentTurn) then println("In check!")
+                    if g.isCheckmate then println("Checkmated!")
+                    else if g.isInCheck then println("In check!")
 
                     println
                     repl.displayPrompt()

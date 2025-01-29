@@ -3,10 +3,10 @@ package io.github.edadma.chess
 class Game(start: ChessBoard = Board()) {
   private var currentBoard: ChessBoard = start
   private var currentTurn: Side        = White
-  private var moves: List[Move]        = List.empty
+  private var moves: List[ChessMove]   = List.empty
   private var halfMoveClock: Int       = 0
 
-  def makeMove(move: Move): Boolean = {
+  def makeMove(move: ChessMove): Boolean = {
     // Verify it's a legal move for the current side
     if (!currentBoard.getMoves(currentTurn).toList.contains(move)) {
       return false
@@ -33,7 +33,7 @@ class Game(start: ChessBoard = Board()) {
 
   def getBoard: ChessBoard = currentBoard
 
-  def getMoveHistory: List[Move] = moves
+  def getMoveHistory: List[ChessMove] = moves
 
   def getCurrentTurn: Side = currentTurn
 
@@ -41,6 +41,8 @@ class Game(start: ChessBoard = Board()) {
 
   def isGameOver: Boolean =
     isCheckmate || isStalemate || isDrawByRepetition || isDrawByFiftyMoveRule
+
+  def isInCheck: Boolean = currentBoard.isInCheck(currentTurn)
 
   def isCheckmate: Boolean = currentBoard.isCheckmate(currentTurn)
 
