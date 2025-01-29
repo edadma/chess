@@ -2,7 +2,8 @@
 
 # core
 ./src/main/scala/io/github/edadma/chess
-Board.scala
+ChessBoard.scala
+ChessMove.scala
 package.scala
 
 # game REPL
@@ -13,6 +14,7 @@ nodejs.scala
 ./src/test/scala/io/github/edadma/chess
 BishopTests.scala
 BoardParserTests.scala
+CastlingTests.scala
 CheckmateTests.scala
 ChessSpec.scala
 KingTests.scala
