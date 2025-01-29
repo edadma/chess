@@ -5,6 +5,7 @@
 ChessBoard.scala
 ChessMove.scala
 Engine.scala
+Game.scala
 package.scala
 SimpleEngine.scala
 

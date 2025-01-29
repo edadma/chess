@@ -81,8 +81,6 @@ class Game(start: ChessBoard = Board()) {
     else if (isInsufficientMaterial) Draw(DrawReason.InsufficientMaterial)
     else Ongoing(currentTurn)
   }
-
-  def lastMoveToSAN: String = currentBoard.lastMoveToSAN
 }
 
 sealed trait GameStatus
