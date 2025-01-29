@@ -23,6 +23,7 @@ lazy val chess = project
 //    Test / scalaJSUseTestModuleInitializer := false,
     Test / scalaJSUseMainModuleInitializer := false,
     Test / scalaJSUseTestModuleInitializer := true,
+    Test / parallelExecution               := false,
     scalaJSUseMainModuleInitializer        := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
     publishMavenStyle      := true,

@@ -126,10 +126,12 @@ class Game(start: ChessBoard = Board()) {
       lastMove.moveType == MoveType.EN_PASSANT
     val captureStr = if (isCapture) "x" else ""
 
-    // For pawns, include file when capturing
-    val pawnCapturePrefix = if (piece.pieceType == PieceType.PAWN && isCapture)
+    // For pawns, always include file when capturing
+    val pawnCapturePrefix = if (piece.pieceType == PieceType.PAWN && isCapture) {
       toAlgebraic(lastMove.fromIndex)(0).toString
-    else ""
+    } else if (piece.pieceType == PieceType.PAWN && lastMove.moveType == MoveType.EN_PASSANT) {
+      toAlgebraic(lastMove.fromIndex)(0).toString
+    } else ""
 
     // Handle promotions
     val promotionStr = lastMove.promotion.map(p => "=" + pieceToChar(p)).getOrElse("")

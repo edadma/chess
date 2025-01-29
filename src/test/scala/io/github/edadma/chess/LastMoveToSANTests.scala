@@ -12,9 +12,9 @@ class LastMoveToSANTests extends ChessSpec {
       "pawn capture" in {
         val game = new Game(Board.fromString("""
                                                |r  n  b  q  k  b  n  r
-                                               |p  p  p  .  p  p  p  p
+                                               |p  p  p  p  .  p  p  p
                                                |.  .  .  .  .  .  .  .
-                                               |.  .  .  p  .  .  .  .
+                                               |.  .  .  .  p  .  .  .
                                                |.  .  .  P  .  .  .  .
                                                |.  .  .  .  .  .  .  .
                                                |P  P  P  .  P  P  P  P
@@ -98,8 +98,8 @@ class LastMoveToSANTests extends ChessSpec {
 
       "checkmate" in {
         val game = new Game(Board.fromString("""
-                                               |.  .  .  .  k  .  .  r
-                                               |.  .  .  .  .  .  R  .
+                                               |.  .  .  .  k  .  .  .
+                                               |Q  .  .  .  .  .  R  .
                                                |.  .  .  .  .  .  .  .
                                                |.  .  .  .  .  .  .  .
                                                |.  .  .  .  .  .  .  .
@@ -107,8 +107,8 @@ class LastMoveToSANTests extends ChessSpec {
                                                |.  .  .  .  .  .  .  .
                                                |.  .  .  .  K  .  .  .
                                                |""".stripMargin))
-        game.makeMove(Move("g7", "e7", WhiteRook))
-        game.lastMoveToSAN shouldBe "Re7#"
+        game.makeMove(Move("g7", "g8", WhiteRook))
+        game.lastMoveToSAN shouldBe "Rg8#"
       }
     }
 
