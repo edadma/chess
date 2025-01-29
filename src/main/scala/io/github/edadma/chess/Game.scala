@@ -88,9 +88,9 @@ class Game(start: ChessBoard = Board()) {
 
   private def moveToSAN(move: ChessMove, previousMove: Option[ChessMove]): String = {
     val builder = new StringBuilder
-    val previousBoard = previousMove match {
-      case Some(prevMove) => moves.tail.foldLeft(start)((b, m) => if (m != prevMove) b.applyMove(m) else b)
-      case None           => if (moves.length > 1) moves.tail.foldLeft(start)((b, m) => b.applyMove(m)) else start
+    val previousBoard = moves match {
+      case head :: tail => tail.foldRight(start)((m, b) => b.applyMove(m))
+      case Nil          => start
     }
 
     move.moveType match {
@@ -99,7 +99,6 @@ class Game(start: ChessBoard = Board()) {
       case _ =>
         if (move.piece.pieceType != PieceType.PAWN) {
           builder.append(pieceToChar(move.piece))
-          // Disambiguation
           val otherPieces = previousBoard.getPiecesBySide(move.piece.side).filter { case (square, piece) =>
             piece.pieceType == move.piece.pieceType && square != move.fromIndex &&
             previousBoard.getMoves(move.piece.side).exists(m => m.fromIndex == square && m.toIndex == move.toIndex)
@@ -115,7 +114,6 @@ class Game(start: ChessBoard = Board()) {
           }
         }
 
-        // Handle captures
         val isCapture = previousBoard.getPiece(move.toIndex).isDefined ||
           (move.piece.pieceType == PieceType.PAWN && (move.fromIndex % 8) != (move.toIndex % 8))
         if (isCapture) {
@@ -125,18 +123,15 @@ class Game(start: ChessBoard = Board()) {
           builder.append('x')
         }
 
-        // Destination square
         builder.append((move.toIndex % 8 + 'a').toChar)
         builder.append((move.toIndex / 8 + 1).toChar)
 
-        // Pawn promotion
-        move.promotion.foreach(p => {
+        move.promotion.foreach { p =>
           builder.append('=')
           builder.append(pieceToChar(p))
-        })
+        }
     }
 
-    // Check or checkmate
     val afterBoard = previousBoard.applyMove(move)
     if (afterBoard.isCheckmate(move.piece.side.opposite)) {
       builder.append('#')
