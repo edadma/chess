@@ -53,7 +53,7 @@ import scala.scalajs.js
                     repl.displayPrompt()
                   } else {
                     println()
-                    println(s"Your move: ${g.lastMoveSAN}")
+                    println(s"Your move: ${g.lastMoveToSAN}")
                     println(g.boardToString(White))
 
                     if (g.isCheckmate) {
@@ -73,7 +73,7 @@ import scala.scalajs.js
                           repl.displayPrompt()
                         case Some(move) =>
                           g.makeMove(move)
-                          println(s"Computer's move: ${g.lastMoveSAN}")
+                          println(s"Computer's move: ${g.lastMoveToSAN}")
                           println()
                           println(g.boardToString(White))
 

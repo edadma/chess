@@ -97,29 +97,31 @@ class Game(start: ChessBoard = Board()) {
     (file, rank)
   }
 
-  def lastMoveSAN: String = {
+  def lastMoveToSAN: String = moveToSAN(currentBoard.lastMove.get)
+
+  def moveToSAN(move: ChessMove): String = {
     val builder = new StringBuilder
 
-    currentBoard.lastMove.get.moveType match {
+    move.moveType match {
       case MoveType.CASTLE_KINGSIDE =>
         builder.append("O-O")
       case MoveType.CASTLE_QUEENSIDE =>
         builder.append("O-O-O")
       case _ =>
         // Add piece symbol (except for pawns)
-        if (currentBoard.lastMove.get.piece.pieceType != PieceType.PAWN) {
-          builder.append(getPieceSymbol(currentBoard.lastMove.get.piece))
+        if (move.piece.pieceType != PieceType.PAWN) {
+          builder.append(getPieceSymbol(move.piece))
         }
 
         // Handle disambiguation
         val similarMoves = currentBoard.getMoves(currentTurn).filter(m =>
-          m.piece == currentBoard.lastMove.get.piece &&
-            m.toIndex == currentBoard.lastMove.get.toIndex &&
-            m.fromIndex != currentBoard.lastMove.get.fromIndex,
+          m.piece == move.piece &&
+            m.toIndex == move.toIndex &&
+            m.fromIndex != move.fromIndex,
         ).toList
 
         if (similarMoves.nonEmpty) {
-          val (fromFile, fromRank) = getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)
+          val (fromFile, fromRank) = getFileRankFromIndex(move.fromIndex)
           val needRank             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._1 == fromFile)
           val needFile             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._2 == fromRank)
 
@@ -132,30 +134,30 @@ class Game(start: ChessBoard = Board()) {
         }
 
         // Add 'x' for captures
-        val isCapture = currentBoard.getPiece(currentBoard.lastMove.get.toIndex).isDefined
+        val isCapture = currentBoard.getPiece(move.toIndex).isDefined
         if (isCapture) {
-          if (currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN) {
-            builder.append(getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1)
+          if (move.piece.pieceType == PieceType.PAWN) {
+            builder.append(getFileRankFromIndex(move.fromIndex)._1)
           }
           builder.append('x')
         } else if (
-          currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN &&
-          getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1 != getFileRankFromIndex(
-            currentBoard.lastMove.get.toIndex,
+          move.piece.pieceType == PieceType.PAWN &&
+          getFileRankFromIndex(move.fromIndex)._1 != getFileRankFromIndex(
+            move.toIndex,
           )._1
         ) {
           // Add only the file for non-capturing diagonal pawn moves (en passant)
-          builder.append(getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1)
+          builder.append(getFileRankFromIndex(move.fromIndex)._1)
           builder.append('x')
         }
 
         // Add destination square
-        val (toFile, toRank) = getFileRankFromIndex(currentBoard.lastMove.get.toIndex)
+        val (toFile, toRank) = getFileRankFromIndex(move.toIndex)
         builder.append(toFile)
         builder.append(toRank)
 
         // Add promotion if applicable
-        currentBoard.lastMove.get.promotion.foreach(p => {
+        move.promotion.foreach(p => {
           builder.append('=')
           builder.append(getPieceSymbol(p))
         })
