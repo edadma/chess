@@ -4,7 +4,9 @@
 ./src/main/scala/io/github/edadma/chess
 ChessBoard.scala
 ChessMove.scala
+Engine.scala
 package.scala
+SimpleEngine.scala
 
 # game REPL
 Main.scala
@@ -16,6 +18,7 @@ BishopTests.scala
 BoardParserTests.scala
 CastlingTests.scala
 CheckmateTests.scala
+CheckMoveTests.scala
 ChessSpec.scala
 KingTests.scala
 KnightTests.scala
