@@ -23,25 +23,14 @@ trait ChessMove {
   def piece: Piece
   def moveType: MoveType
   def promotion: Option[Piece]
-
-  override def equals(other: Any): Boolean = other match {
-    case that: ChessMove =>
-      this.fromIndex == that.fromIndex &&
-      this.toIndex == that.toIndex
-    case _ => false
-  }
-
-  override def hashCode(): Int = {
-    41 * (41 + fromIndex) + toIndex
-  }
 }
 
-class Move(
+case class Move(
     from: String,
     to: String,
-    val piece: Piece,
-    val moveType: MoveType = MoveType.NORMAL,
-    val promotion: Option[Piece] = None,
+    piece: Piece,
+    moveType: MoveType = MoveType.NORMAL,
+    promotion: Option[Piece] = None,
 ) extends ChessMove:
   def fromIndex: Int = fromAlgebraic(from)
   def toIndex: Int   = fromAlgebraic(to)
@@ -69,20 +58,6 @@ case object Black extends Side {
 sealed trait Piece {
   def side: Side
   def pieceType: PieceType
-}
-
-class UserMove(from: String, to: String, board: ChessBoard) extends ChessMove {
-  val fromIndex: Int = fromAlgebraic(from)
-
-  val toIndex: Int = fromAlgebraic(to)
-
-  val piece: Piece = board.getPiece(fromIndex).getOrElse(
-    throw new IllegalStateException(s"No piece found at square $from"),
-  )
-
-  val moveType: MoveType = MoveType.NORMAL
-
-  val promotion: Option[Piece] = None
 }
 
 case object WhitePawn   extends Piece { def side: Side = White; def pieceType: PieceType = PieceType.PAWN   }

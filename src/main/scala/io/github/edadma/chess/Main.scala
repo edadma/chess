@@ -37,9 +37,19 @@ import scala.scalajs.js
                 repl.displayPrompt()
               } else {
                 val List(from, to) = list
+                val piece          = g.getBoard.getPiece(fromAlgebraic(from))
 
                 try {
-                  if (!g.makeMove(UserMove(from, to, g.getBoard))) {
+                  if (
+                    piece.isEmpty ||
+                    !g.makeMove(g.moveFactory.create(
+                      fromAlgebraic(from),
+                      fromAlgebraic(to),
+                      piece.get,
+                      MoveType.NORMAL,
+                      None,
+                    ))
+                  ) {
                     error("Illegal move")
                     repl.displayPrompt()
                   } else {

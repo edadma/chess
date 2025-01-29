@@ -87,6 +87,7 @@ trait ChessBoard {
   def getPiece(file: Int, rank: Int): Option[Piece]
   def getMoves(side: Side): Iterator[ChessMove]
   def boardToString(side: Side): String
+  def moveFactory: ChessMoveFactory
 
   def canCastleKingside(side: Side): Boolean
 
@@ -459,11 +460,13 @@ case class Board(
     }
   }
 
+  def moveFactory: ChessMoveFactory = MoveFactory
+
   def getPiece(square: Int): Option[Piece] = pieces.get(toAlgebraic(square))
 
   def getPiece(file: Int, rank: Int): Option[Piece] = pieces.get(toAlgebraic(rank * 8 + file))
 
-  def getMoves(side: Side): Iterator[ChessMove] = getMoves(side, MoveFactory)
+  def getMoves(side: Side): Iterator[ChessMove] = getMoves(side, moveFactory)
 
   def applyMove(move: ChessMove): ChessBoard =
     val from  = toAlgebraic(move.fromIndex)

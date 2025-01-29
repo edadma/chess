@@ -6,6 +6,8 @@ class Game(start: ChessBoard = Board()) {
   private var moves: List[ChessMove]   = List.empty
   private var halfMoveClock: Int       = 0
 
+  def moveFactory: ChessMoveFactory = currentBoard.moveFactory
+
   def makeMove(move: ChessMove): Boolean = {
     // Verify it's a legal move for the current side
     if (!currentBoard.getMoves(currentTurn).toList.contains(move)) {
