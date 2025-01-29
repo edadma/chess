@@ -23,14 +23,25 @@ trait ChessMove {
   def piece: Piece
   def moveType: MoveType
   def promotion: Option[Piece]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ChessMove =>
+      this.fromIndex == that.fromIndex &&
+      this.toIndex == that.toIndex
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    41 * (41 + fromIndex) + toIndex
+  }
 }
 
-case class Move(
+class Move(
     from: String,
     to: String,
-    piece: Piece,
-    moveType: MoveType = MoveType.NORMAL,
-    promotion: Option[Piece] = None,
+    val piece: Piece,
+    val moveType: MoveType = MoveType.NORMAL,
+    val promotion: Option[Piece] = None,
 ) extends ChessMove:
   def fromIndex: Int = fromAlgebraic(from)
   def toIndex: Int   = fromAlgebraic(to)
@@ -60,7 +71,7 @@ sealed trait Piece {
   def pieceType: PieceType
 }
 
-case class UserMove(from: String, to: String, board: ChessBoard) extends ChessMove {
+class UserMove(from: String, to: String, board: ChessBoard) extends ChessMove {
   val fromIndex: Int = fromAlgebraic(from)
 
   val toIndex: Int = fromAlgebraic(to)

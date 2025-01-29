@@ -9,6 +9,7 @@ class Game(start: ChessBoard = Board()) {
   def makeMove(move: ChessMove): Boolean = {
     // Verify it's a legal move for the current side
     if (!currentBoard.getMoves(currentTurn).toList.contains(move)) {
+      println(currentBoard.getMoves(currentTurn).toList)
       return false
     }
 

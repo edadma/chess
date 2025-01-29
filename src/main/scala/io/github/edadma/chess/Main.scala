@@ -3,11 +3,13 @@ package io.github.edadma.chess
 import scala.scalajs.js
 
 @main def run(): Unit =
-  val g      = new Game
-  val player = new SimpleEngine
+  val g        = new Game
+  val player   = new SimpleEngine
+  var gameOver = false
 
+  // Show initial board
   println(g.boardToString(White))
-  println
+  println()
 
   def error(msg: String): Unit = println(Console.RED ++ s"$msg\n" ++ Console.RESET)
 
@@ -16,44 +18,85 @@ import scala.scalajs.js
   val options: REPLOptions =
     new REPLOptions {
       prompt = "> "
-      eval =
-        (cmd: String, context: js.Object, filename: String, callback: js.Function2[js.Any, js.Any, Unit]) => {
+      eval = (cmd: String, context: js.Object, filename: String, callback: js.Function2[js.Any, js.Any, Unit]) => {
+        if (gameOver) {
+          println("Game is over! Start a new game.")
+          repl.displayPrompt()
+        } else {
           try {
-            val list = cmd.trim.split(" ").toList
+            val input = cmd.trim
 
-            if list.length != 2 then callback(null, "expected '<from> <to>'")
-            else
-              val List(from, to) = list
+            if (input.toLowerCase == "quit" || input.toLowerCase == "exit") {
+              println("Thanks for playing!")
+              repl.close()
+            } else {
+              val list = input.split(" ").toList
 
-              if !g.makeMove(UserMove(from, to, g.getBoard)) then
-                error("illegal move")
+              if (list.length != 2) {
+                error("Expected '<from> <to>' (e.g. 'e2 e4')")
                 repl.displayPrompt()
-              else
-                println
-                println(g.boardToString(White))
+              } else {
+                val List(from, to) = list
 
-                if g.isCheckmate then println("Checkmate!")
-                else if g.isInCheck then println("Check!")
-
-                println
-
-                player.makeMove(g) match
-                  case None => error("couldn't make a move")
-                  case Some(move) =>
-                    g.makeMove(move)
-                    println
+                try {
+                  if (!g.makeMove(UserMove(from, to, g.getBoard))) {
+                    error("Illegal move")
+                    repl.displayPrompt()
+                  } else {
+                    println()
                     println(g.boardToString(White))
 
-                    if g.isCheckmate then println("Checkmated!")
-                    else if g.isInCheck then println("In check!")
+                    if (g.isCheckmate) {
+                      println("Checkmate - You win!")
+                      gameOver = true
+                      repl.displayPrompt()
+                    } else {
+                      if (g.isInCheck) {
+                        println("Check!")
+                      }
+                      println()
 
-                    println
+                      // Computer's move
+                      player.makeMove(g) match {
+                        case None =>
+                          error("Computer couldn't make a move")
+                          repl.displayPrompt()
+                        case Some(move) =>
+                          g.makeMove(move)
+                          println()
+                          println(g.boardToString(White))
+
+                          if (g.isCheckmate) {
+                            println("Checkmate - Computer wins!")
+                            gameOver = true
+                          } else if (g.isInCheck) {
+                            println("You are in check!")
+                          }
+                          println()
+                          repl.displayPrompt()
+                      }
+                    }
+                  }
+                } catch {
+                  case e: IllegalArgumentException =>
+                    error(s"Invalid move format: ${e.getMessage}")
                     repl.displayPrompt()
+                }
+              }
+            }
           } catch {
             case e: js.JavaScriptException =>
               callback(e.asInstanceOf[js.Any], null)
+            case e: Exception =>
+              error(s"Error: ${e.getMessage}")
+              repl.displayPrompt()
           }
         }
+      }
     }
+
+  println("Welcome to Chess! Enter moves in the format 'e2 e4'")
+  println("Type 'quit' or 'exit' to end the game")
+  println()
 
   repl = REPLModule.start(options)
