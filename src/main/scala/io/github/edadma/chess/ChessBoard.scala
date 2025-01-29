@@ -406,7 +406,7 @@ trait ChessBoard {
   def isStalemate(side: Side): Boolean = !isInCheck(side) && getMoves(side).isEmpty
 
   def applyMove(move: ChessMove): ChessBoard
-  def lastMove: Option[Move]
+  def lastMove: Option[ChessMove]
 }
 
 object Board {
@@ -447,7 +447,7 @@ object Board {
 
 case class Board(
     pieces: Map[String, Piece],
-    lastMove: Option[Move] = None,
+    lastMove: Option[ChessMove] = None,
     whiteCanCastleKingside: Boolean = true,
     whiteCanCastleQueenside: Boolean = true,
     blackCanCastleKingside: Boolean = true,
@@ -496,7 +496,7 @@ case class Board(
 
     Board(
       newPieces,
-      Some(move.asInstanceOf[Move]),
+      Some(move),
       newWhiteKingside,
       newWhiteQueenside,
       newBlackKingside,
