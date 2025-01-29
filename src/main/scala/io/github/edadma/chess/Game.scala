@@ -133,15 +133,19 @@ class Game(start: ChessBoard = Board()) {
 
         // Add 'x' for captures
         val isCapture = currentBoard.getPiece(currentBoard.lastMove.get.toIndex).isDefined
-        if (
-          isCapture || (currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN &&
-            getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1 != getFileRankFromIndex(
-              currentBoard.lastMove.get.toIndex,
-            )._1)
-        ) {
+        if (isCapture) {
           if (currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN) {
             builder.append(getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1)
           }
+          builder.append('x')
+        } else if (
+          currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN &&
+          getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1 != getFileRankFromIndex(
+            currentBoard.lastMove.get.toIndex,
+          )._1
+        ) {
+          // Add only the file for non-capturing diagonal pawn moves (en passant)
+          builder.append(getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1)
           builder.append('x')
         }
 
