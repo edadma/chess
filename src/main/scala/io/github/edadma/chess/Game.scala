@@ -37,12 +37,40 @@ class Game(start: ChessBoard = Board()) {
   def isStalemate: Boolean = currentBoard.isStalemate(currentTurn)
 
   def isDrawByRepetition: Boolean = {
-    // Count occurrences of each position in the move history
-    val positions = moves.scanLeft(currentBoard)((b, m) => b.applyMove(m))
-    positions.groupBy(_.getPieces).exists(_._2.size >= 3)
+    // Group the board states by their piece positions and count occurrences
+    val positions = boards.map(board => board.getPieces.toSet).groupBy(identity)
+
+    // Check if any position occurs 3 or more times
+    positions.exists(_._2.size >= 3)
   }
 
-  def isDrawByFiftyMoveRule: Boolean = halfMoveClock >= 100 // 50 moves = 100 half moves
+  def isDrawByFiftyMoveRule: Boolean = {
+    if (boards.size < 100) return false // Need at least 100 half-moves (50 full moves)
+
+    // Look at the last 100 board states (50 moves)
+    val recentBoards = boards.take(100)
+
+    // Check for any pawn moves or captures in the sequence
+    val noPawnMoveOrCapture = recentBoards.sliding(2).forall { pair =>
+      val newer = pair.head
+      val older = pair.last
+
+      // Get the pieces for both boards
+      val newerPieces = newer.getPieces.toMap
+      val olderPieces = older.getPieces.toMap
+
+      // Check if the moving piece was a pawn
+      val lastMove       = newer.lastMove.get
+      val wasNotPawnMove = lastMove.piece.pieceType != PieceType.PAWN
+
+      // Check if there was a capture (piece count changed)
+      val wasNotCapture = newerPieces.size == olderPieces.size
+
+      wasNotPawnMove && wasNotCapture
+    }
+
+    noPawnMoveOrCapture
+  }
 
   def isInsufficientMaterial: Boolean = {
     val pieces = currentBoard.getPieces.map(_._2).toList
