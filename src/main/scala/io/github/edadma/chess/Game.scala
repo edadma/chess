@@ -81,6 +81,91 @@ class Game(start: ChessBoard = Board()) {
     else if (isInsufficientMaterial) Draw(DrawReason.InsufficientMaterial)
     else Ongoing(currentTurn)
   }
+
+  private def getPieceSymbol(piece: Piece): String = piece.pieceType match {
+    case PieceType.KING   => "K"
+    case PieceType.QUEEN  => "Q"
+    case PieceType.ROOK   => "R"
+    case PieceType.BISHOP => "B"
+    case PieceType.KNIGHT => "N"
+    case _                => "" // Pawns don't have a symbol in SAN
+  }
+
+  private def getFileRankFromIndex(index: Int): (Char, Int) = {
+    val file = ('a' + (index % 8)).toChar
+    val rank = (index / 8) + 1
+    (file, rank)
+  }
+
+  def lastMoveSAN: String = {
+    val builder = new StringBuilder
+
+    currentBoard.lastMove.get.moveType match {
+      case MoveType.CASTLE_KINGSIDE =>
+        builder.append("O-O")
+      case MoveType.CASTLE_QUEENSIDE =>
+        builder.append("O-O-O")
+      case _ =>
+        // Add piece symbol (except for pawns)
+        if (currentBoard.lastMove.get.piece.pieceType != PieceType.PAWN) {
+          builder.append(getPieceSymbol(currentBoard.lastMove.get.piece))
+        }
+
+        // Handle disambiguation
+        val similarMoves = currentBoard.getMoves(currentTurn).filter(m =>
+          m.piece == currentBoard.lastMove.get.piece &&
+            m.toIndex == currentBoard.lastMove.get.toIndex &&
+            m.fromIndex != currentBoard.lastMove.get.fromIndex,
+        ).toList
+
+        if (similarMoves.nonEmpty) {
+          val (fromFile, fromRank) = getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)
+          val needRank             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._1 == fromFile)
+          val needFile             = similarMoves.exists(m => getFileRankFromIndex(m.fromIndex)._2 == fromRank)
+
+          if (needFile || !needRank) {
+            builder.append(fromFile)
+          }
+          if (needRank) {
+            builder.append(fromRank)
+          }
+        }
+
+        // Add 'x' for captures
+        val isCapture = currentBoard.getPiece(currentBoard.lastMove.get.toIndex).isDefined
+        if (
+          isCapture || (currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN &&
+            getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1 != getFileRankFromIndex(
+              currentBoard.lastMove.get.toIndex,
+            )._1)
+        ) {
+          if (currentBoard.lastMove.get.piece.pieceType == PieceType.PAWN) {
+            builder.append(getFileRankFromIndex(currentBoard.lastMove.get.fromIndex)._1)
+          }
+          builder.append('x')
+        }
+
+        // Add destination square
+        val (toFile, toRank) = getFileRankFromIndex(currentBoard.lastMove.get.toIndex)
+        builder.append(toFile)
+        builder.append(toRank)
+
+        // Add promotion if applicable
+        currentBoard.lastMove.get.promotion.foreach(p => {
+          builder.append('=')
+          builder.append(getPieceSymbol(p))
+        })
+    }
+
+    // Add check/checkmate symbols
+    if (isCheckmate) {
+      builder.append('#')
+    } else if (isInCheck) {
+      builder.append('+')
+    }
+
+    builder.toString
+  }
 }
 
 sealed trait GameStatus
